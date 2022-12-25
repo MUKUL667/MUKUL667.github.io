@@ -68,7 +68,7 @@ a:hover,a:active,a:focus{
     font-size: 4em;
     font-weight: 300;
     text-align: center;
-    overflow: hidden;
+    /* overflow: hidden; */
     margin-bottom: 70px;
 }
 .block_title:before,.block_title:after {
@@ -406,6 +406,7 @@ header{
     max-width: 200px;
     max-height: 200px;
     margin-bottom: 30px;
+	background:black ;
 }
 .testimonila-block p {
     max-width: 60%;
