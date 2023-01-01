@@ -64,7 +64,7 @@ a:hover,a:active,a:focus{
 /////////////////////////////////////////////////////////////////////*/
 
 header{
-	background:linear-grad url(../images/bg-small.jpg) no-repeat;
+	background:url(../images/bg-small.jpg) no-repeat;
 	/* background: #333; */
 	background-size: cover;
 	background-attachment: fixed;
