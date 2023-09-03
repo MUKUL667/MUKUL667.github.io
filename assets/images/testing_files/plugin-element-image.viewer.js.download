@@ -1,0 +1,943 @@
+(function () {
+    'use strict';
+
+    /******************************************************************************
+    Copyright (c) Microsoft Corporation.
+
+    Permission to use, copy, modify, and/or distribute this software for any
+    purpose with or without fee is hereby granted.
+
+    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+    REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+    AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+    INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+    LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+    OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+    PERFORMANCE OF THIS SOFTWARE.
+    ***************************************************************************** */
+
+    function __awaiter$1(thisArg, _arguments, P, generator) {
+        function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+        return new (P || (P = Promise))(function (resolve, reject) {
+            function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+            function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+            function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+            step((generator = generator.apply(thisArg, _arguments || [])).next());
+        });
+    }
+
+    var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+
+    var objectPath = {exports: {}};
+
+    (function (module) {
+    	(function (root, factory) {
+
+    	  /*istanbul ignore next:cant test*/
+    	  {
+    	    module.exports = factory();
+    	  }
+    	})(commonjsGlobal, function () {
+
+    	  var toStr = Object.prototype.toString;
+
+    	  function hasOwnProperty (obj, prop) {
+    	    if (obj == null) {
+    	      return false
+    	    }
+    	    //to handle objects with null prototypes (too edge case?)
+    	    return Object.prototype.hasOwnProperty.call(obj, prop)
+    	  }
+
+    	  function isEmpty (value) {
+    	    if (!value) {
+    	      return true
+    	    }
+    	    if (isArray(value) && value.length === 0) {
+    	      return true
+    	    } else if (typeof value !== 'string') {
+    	      for (var i in value) {
+    	        if (hasOwnProperty(value, i)) {
+    	          return false
+    	        }
+    	      }
+    	      return true
+    	    }
+    	    return false
+    	  }
+
+    	  function toString (type) {
+    	    return toStr.call(type)
+    	  }
+
+    	  function isObject (obj) {
+    	    return typeof obj === 'object' && toString(obj) === '[object Object]'
+    	  }
+
+    	  var isArray = Array.isArray || function (obj) {
+    	    /*istanbul ignore next:cant test*/
+    	    return toStr.call(obj) === '[object Array]'
+    	  };
+
+    	  function isBoolean (obj) {
+    	    return typeof obj === 'boolean' || toString(obj) === '[object Boolean]'
+    	  }
+
+    	  function getKey (key) {
+    	    var intKey = parseInt(key);
+    	    if (intKey.toString() === key) {
+    	      return intKey
+    	    }
+    	    return key
+    	  }
+
+    	  function factory (options) {
+    	    options = options || {};
+
+    	    var objectPath = function (obj) {
+    	      return Object.keys(objectPath).reduce(function (proxy, prop) {
+    	        if (prop === 'create') {
+    	          return proxy
+    	        }
+
+    	        /*istanbul ignore else*/
+    	        if (typeof objectPath[prop] === 'function') {
+    	          proxy[prop] = objectPath[prop].bind(objectPath, obj);
+    	        }
+
+    	        return proxy
+    	      }, {})
+    	    };
+
+    	    var hasShallowProperty;
+    	    if (options.includeInheritedProps) {
+    	      hasShallowProperty = function () {
+    	        return true
+    	      };
+    	    } else {
+    	      hasShallowProperty = function (obj, prop) {
+    	        return (typeof prop === 'number' && Array.isArray(obj)) || hasOwnProperty(obj, prop)
+    	      };
+    	    }
+
+    	    function getShallowProperty (obj, prop) {
+    	      if (hasShallowProperty(obj, prop)) {
+    	        return obj[prop]
+    	      }
+    	    }
+
+    	    var getShallowPropertySafely;
+    	    if (options.includeInheritedProps) {
+    	      getShallowPropertySafely = function (obj, currentPath) {
+    	        if (typeof currentPath !== 'string' && typeof currentPath !== 'number') {
+    	          currentPath = String(currentPath);
+    	        }
+    	        var currentValue = getShallowProperty(obj, currentPath);
+    	        if (currentPath === '__proto__' || currentPath === 'prototype' ||
+    	          (currentPath === 'constructor' && typeof currentValue === 'function')) {
+    	          throw new Error('For security reasons, object\'s magic properties cannot be set')
+    	        }
+    	        return currentValue
+    	      };
+    	    } else {
+    	      getShallowPropertySafely = function (obj, currentPath) {
+    	        return getShallowProperty(obj, currentPath)
+    	      };
+    	    }
+
+    	    function set (obj, path, value, doNotReplace) {
+    	      if (typeof path === 'number') {
+    	        path = [path];
+    	      }
+    	      if (!path || path.length === 0) {
+    	        return obj
+    	      }
+    	      if (typeof path === 'string') {
+    	        return set(obj, path.split('.').map(getKey), value, doNotReplace)
+    	      }
+    	      var currentPath = path[0];
+    	      var currentValue = getShallowPropertySafely(obj, currentPath);
+    	      if (path.length === 1) {
+    	        if (currentValue === void 0 || !doNotReplace) {
+    	          obj[currentPath] = value;
+    	        }
+    	        return currentValue
+    	      }
+
+    	      if (currentValue === void 0) {
+    	        //check if we assume an array
+    	        if (typeof path[1] === 'number') {
+    	          obj[currentPath] = [];
+    	        } else {
+    	          obj[currentPath] = {};
+    	        }
+    	      }
+
+    	      return set(obj[currentPath], path.slice(1), value, doNotReplace)
+    	    }
+
+    	    objectPath.has = function (obj, path) {
+    	      if (typeof path === 'number') {
+    	        path = [path];
+    	      } else if (typeof path === 'string') {
+    	        path = path.split('.');
+    	      }
+
+    	      if (!path || path.length === 0) {
+    	        return !!obj
+    	      }
+
+    	      for (var i = 0; i < path.length; i++) {
+    	        var j = getKey(path[i]);
+
+    	        if ((typeof j === 'number' && isArray(obj) && j < obj.length) ||
+    	          (options.includeInheritedProps ? (j in Object(obj)) : hasOwnProperty(obj, j))) {
+    	          obj = obj[j];
+    	        } else {
+    	          return false
+    	        }
+    	      }
+
+    	      return true
+    	    };
+
+    	    objectPath.ensureExists = function (obj, path, value) {
+    	      return set(obj, path, value, true)
+    	    };
+
+    	    objectPath.set = function (obj, path, value, doNotReplace) {
+    	      return set(obj, path, value, doNotReplace)
+    	    };
+
+    	    objectPath.insert = function (obj, path, value, at) {
+    	      var arr = objectPath.get(obj, path);
+    	      at = ~~at;
+    	      if (!isArray(arr)) {
+    	        arr = [];
+    	        objectPath.set(obj, path, arr);
+    	      }
+    	      arr.splice(at, 0, value);
+    	    };
+
+    	    objectPath.empty = function (obj, path) {
+    	      if (isEmpty(path)) {
+    	        return void 0
+    	      }
+    	      if (obj == null) {
+    	        return void 0
+    	      }
+
+    	      var value, i;
+    	      if (!(value = objectPath.get(obj, path))) {
+    	        return void 0
+    	      }
+
+    	      if (typeof value === 'string') {
+    	        return objectPath.set(obj, path, '')
+    	      } else if (isBoolean(value)) {
+    	        return objectPath.set(obj, path, false)
+    	      } else if (typeof value === 'number') {
+    	        return objectPath.set(obj, path, 0)
+    	      } else if (isArray(value)) {
+    	        value.length = 0;
+    	      } else if (isObject(value)) {
+    	        for (i in value) {
+    	          if (hasShallowProperty(value, i)) {
+    	            delete value[i];
+    	          }
+    	        }
+    	      } else {
+    	        return objectPath.set(obj, path, null)
+    	      }
+    	    };
+
+    	    objectPath.push = function (obj, path /*, values */) {
+    	      var arr = objectPath.get(obj, path);
+    	      if (!isArray(arr)) {
+    	        arr = [];
+    	        objectPath.set(obj, path, arr);
+    	      }
+
+    	      arr.push.apply(arr, Array.prototype.slice.call(arguments, 2));
+    	    };
+
+    	    objectPath.coalesce = function (obj, paths, defaultValue) {
+    	      var value;
+
+    	      for (var i = 0, len = paths.length; i < len; i++) {
+    	        if ((value = objectPath.get(obj, paths[i])) !== void 0) {
+    	          return value
+    	        }
+    	      }
+
+    	      return defaultValue
+    	    };
+
+    	    objectPath.get = function (obj, path, defaultValue) {
+    	      if (typeof path === 'number') {
+    	        path = [path];
+    	      }
+    	      if (!path || path.length === 0) {
+    	        return obj
+    	      }
+    	      if (obj == null) {
+    	        return defaultValue
+    	      }
+    	      if (typeof path === 'string') {
+    	        return objectPath.get(obj, path.split('.'), defaultValue)
+    	      }
+
+    	      var currentPath = getKey(path[0]);
+    	      var nextObj = getShallowPropertySafely(obj, currentPath);
+    	      if (nextObj === void 0) {
+    	        return defaultValue
+    	      }
+
+    	      if (path.length === 1) {
+    	        return nextObj
+    	      }
+
+    	      return objectPath.get(obj[currentPath], path.slice(1), defaultValue)
+    	    };
+
+    	    objectPath.del = function del (obj, path) {
+    	      if (typeof path === 'number') {
+    	        path = [path];
+    	      }
+
+    	      if (obj == null) {
+    	        return obj
+    	      }
+
+    	      if (isEmpty(path)) {
+    	        return obj
+    	      }
+    	      if (typeof path === 'string') {
+    	        return objectPath.del(obj, path.split('.'))
+    	      }
+
+    	      var currentPath = getKey(path[0]);
+    	      getShallowPropertySafely(obj, currentPath);
+    	      if (!hasShallowProperty(obj, currentPath)) {
+    	        return obj
+    	      }
+
+    	      if (path.length === 1) {
+    	        if (isArray(obj)) {
+    	          obj.splice(currentPath, 1);
+    	        } else {
+    	          delete obj[currentPath];
+    	        }
+    	      } else {
+    	        return objectPath.del(obj[currentPath], path.slice(1))
+    	      }
+
+    	      return obj
+    	    };
+
+    	    return objectPath
+    	  }
+
+    	  var mod = factory();
+    	  mod.create = factory;
+    	  mod.withInheritedProps = factory({includeInheritedProps: true});
+    	  return mod
+    	}); 
+    } (objectPath));
+
+    var objectPathExports = objectPath.exports;
+
+    /******************************************************************************
+    Copyright (c) Microsoft Corporation.
+
+    Permission to use, copy, modify, and/or distribute this software for any
+    purpose with or without fee is hereby granted.
+
+    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+    REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+    AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+    INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+    LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+    OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+    PERFORMANCE OF THIS SOFTWARE.
+    ***************************************************************************** */
+
+    function __awaiter(thisArg, _arguments, P, generator) {
+        function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+        return new (P || (P = Promise))(function (resolve, reject) {
+            function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+            function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+            function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+            step((generator = generator.apply(thisArg, _arguments || [])).next());
+        });
+    }
+    function isElementPlugin(plugin) {
+        if (plugin.type === "ElementPlugin")
+            return true;
+        return false;
+    }
+    function isAureliaElementPlugin(plugin) {
+        if (isElementPlugin(plugin) && plugin.kind === "AureliaComponent")
+            return true;
+        return false;
+    }
+    function registerElementPlugin(name, plugin) {
+        objectPathExports.set(window, `kp.element.${name}`, plugin);
+    }
+    class KappaPluginBase {
+        constructor() {
+            Object.defineProperty(this, "_isReady", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+            Object.defineProperty(this, "_pluginConfig", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+        }
+        get pluginConfig() {
+            return this._pluginConfig;
+        }
+        get isReady() {
+            return this._isReady;
+        }
+        get name() {
+            return "";
+        }
+        get configurable() {
+            return false;
+        }
+        setup(config) {
+            return __awaiter(this, void 0, void 0, function* () {
+                throw new Error('Method not implemented.');
+            });
+        }
+        getMethod(name) {
+            if (this[name] && typeof this[name] === "function") {
+                return this[name].bind(this);
+            }
+            return null;
+        }
+    }
+    Object.defineProperty(KappaPluginBase, "attributes", {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: []
+    });
+    Object.defineProperty(KappaPluginBase, "methods", {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: []
+    });
+    Object.defineProperty(KappaPluginBase, "events", {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: []
+    });
+
+    class KappaPluginElement extends KappaPluginBase {
+        _elementRenderer;
+        get name() {
+            return "Element";
+        }
+        async setup(config) {
+            this._pluginConfig = config.plugin;
+            if (!isAureliaElementPlugin(config.plugin)) {
+                console.error("Not a Valid Aurelia Component Plugin: ", config.plugin);
+                return;
+            }
+            const renderer = this.getRenderer();
+            this._elementRenderer = renderer;
+            this._isReady = true;
+        }
+        ;
+        getRenderer() {
+            throw Error("Not Implemented");
+        }
+        elementRenderer() {
+            return this._elementRenderer;
+        }
+        // Define Static inside Definition to make it Tree Shakable
+        static attributes = [
+            { name: "stackWidthConstraint", label: "Stack Width Constraint", schema: { type: "STRING" }, target: "element", isLayoutAttribute: true },
+            { name: "stackHeightConstraint", label: "Stack Height Constraint", schema: { type: "STRING" }, target: "element", isLayoutAttribute: true }
+        ];
+        static events = [
+            { name: "ElementShow", label: "Show", emitter: "element" },
+            { name: "ElementHide", label: "Hide", emitter: "element" },
+            { name: "ElementClick", label: "Click", emitter: "element" }
+        ];
+        static methods = [
+            {
+                name: "isVisible",
+                label: "Is Visible",
+                params: [],
+                schema: { type: "BOOLEAN" },
+                expressionTemplate: ["Is", { target: "element", type: "target" }, "Visible"]
+            },
+            {
+                name: "isHidden",
+                label: "Is Hidden",
+                params: [],
+                schema: { type: "BOOLEAN" },
+                expressionTemplate: ["Is", { target: "element", type: "target" }, "Hidden"]
+            },
+            {
+                name: "show",
+                label: "Show",
+                params: [],
+                expressionTemplate: ["Show", { target: "element", type: "target" }]
+            },
+            {
+                name: "hide",
+                label: "Hide",
+                params: [],
+                expressionTemplate: ["Hide", { target: "element", type: "target" }]
+            },
+            {
+                name: "forceShow",
+                label: "Force Show",
+                params: [],
+                expressionTemplate: ["Force Show", { target: "element", type: "target" }]
+            },
+            {
+                name: "forceHide",
+                label: "Force Hide",
+                params: [],
+                expressionTemplate: ["Force Hide", { target: "element", type: "target" }]
+            },
+            {
+                name: "clearForceVisibility",
+                label: "Clear Force Visibility",
+                params: [],
+                expressionTemplate: ["Clear Force Visibility", "of", { target: "element", type: "target" }]
+            },
+            {
+                name: "setX",
+                label: "Set X",
+                params: [{ name: "x", label: "X", schema: { type: "NUMBER" } }],
+                expressionTemplate: ["Set", "X", "of", { target: "element", type: "target" }, "to", { type: "hole", targetParamName: "x" }]
+            },
+            {
+                name: "setY",
+                label: "Set Y",
+                params: [{ name: "y", label: "Y", schema: { type: "NUMBER" } }],
+                expressionTemplate: ["Set", "Y", "of", { target: "element", type: "target" }, "to", { type: "hole", targetParamName: "y" }]
+            },
+            {
+                name: "setWidth",
+                label: "Set Width",
+                params: [{ name: "width", label: "Width", schema: { type: "NUMBER" } }],
+                expressionTemplate: ["Set", "width", "of", { target: "element", type: "target" }, "to", { type: "hole", targetParamName: "width" }]
+            },
+            {
+                name: "setHeight",
+                label: "Set Height",
+                params: [{ name: "height", label: "Height", schema: { type: "NUMBER" } }],
+                expressionTemplate: ["Set", "height", "of", { target: "element", type: "target" }, "to", { type: "hole", targetParamName: "height" }]
+            },
+            {
+                name: "setBorderRadius",
+                label: "Set Border Radius",
+                params: [{ name: "radius", label: "Radius", schema: { type: "NUMBER" } }],
+                expressionTemplate: ["Set", "border radius", "of", { target: "element", type: "target" }, "to", { type: "hole", targetParamName: "radius" }]
+            },
+            {
+                name: "setOpacity",
+                label: "Set Opacity",
+                params: [{ name: "opacity", label: "Opacity", schema: { type: "NUMBER" } }],
+                expressionTemplate: ["Set", "opacity", "of", { target: "element", type: "target" }, "to", { type: "hole", targetParamName: "opacity" }]
+            },
+            {
+                name: "setBgColor",
+                label: "Set Background Color",
+                params: [{ name: "color", label: "Color", schema: { type: "COLOR" } }],
+                expressionTemplate: ["Set", "background color", "of", { target: "element", type: "target" }, "to", { type: "hole", targetParamName: "color" }]
+            }
+        ];
+    }
+
+    class KappaElementRenderer {
+        element;
+        constructor(element) {
+            this.element = element;
+        }
+        get $element() {
+            return this.element;
+        }
+        get $renderer() {
+            return this;
+        }
+        get isAttached() {
+            return this.$element.isAttached;
+        }
+        get state() {
+            return this.$element.state;
+        }
+        elementCreated() { }
+        async elementBinding() { }
+        async elementBound() { }
+        async viewAttaching() { }
+        async viewAttached() { }
+        async viewDetaching() { }
+        async viewDetached() { }
+        async onViewerMute() { }
+        async onViewerUnmute() { }
+        async onViewerPause() { }
+        async onViewerPlay() { }
+        async onViewerResize() { }
+        async onProcessData() { }
+        async onProcessPose() { }
+        async onProcessStyle() { }
+        getMethod(name) {
+            if (this[name] && typeof this[name] === "function") {
+                return this[name].bind(this);
+            }
+            return null;
+        }
+        async changeRuntimeState(callback) {
+            return await this.$element?.changeRuntimeState(callback);
+        }
+        changeRuntimeCurrentTime(currentTime) {
+            this.$element?.changeRuntimeCurrentTime(currentTime);
+        }
+        async onStateChange(state, paths, forced) { }
+        async onChildStateChange(childId, state, paths) { }
+        async onUpdateDefaultState(state) {
+            return state;
+        }
+        async onResetElement() { }
+        async onSetupAttributeObservers() { }
+        async onObservedAttributeValueChanged(request, value) { }
+    }
+
+    var html = "<picture>\n    <source if.bind=\"$renderer.mediaSrc\" srcset.bind=\"$renderer.mediaSrc\">\n    <img class=\"elem-${$element.elementId}-image\" src.bind=\"$renderer.mediaSrc || $renderer.fallbackMediaSrc\" crossorigin=\"anonymous\">\n</picture>";
+
+    class KappaElementImage extends KappaElementRenderer {
+        constructor(refere) {
+            super(refere);
+            Object.defineProperty(this, "resizeObserver", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+            Object.defineProperty(this, "visibilityObserver", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+            Object.defineProperty(this, "mediaSrc", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: ""
+            });
+            Object.defineProperty(this, "fallbackMediaSrc", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: ""
+            });
+            this.imageSizeChanged = this.imageSizeChanged.bind(this);
+        }
+        get state() {
+            return super.state;
+        }
+        get mediaTargetResolution() {
+            const bb = this.$element.htmlRef.getBoundingClientRect();
+            const area = bb.width * bb.height;
+            const diffs = [area - 480 * 360, area - 858 * 480, area - 1280 * 720, area - 1920 * 1080].map(x => Math.abs(x)).filter(x => x > 0);
+            const smallestDiff = Math.min(...diffs);
+            const smallestDiffIndex = diffs.indexOf(smallestDiff);
+            switch (smallestDiffIndex) {
+                case 0:
+                    return "360p";
+                case 1:
+                    return "480p";
+                case 2:
+                    return "720p";
+                case 3:
+                    return "1080p";
+            }
+        }
+        onProcessStyle() {
+            const _super = Object.create(null, {
+                onProcessStyle: { get: () => super.onProcessStyle }
+            });
+            return __awaiter$1(this, void 0, void 0, function* () {
+                yield _super.onProcessStyle.call(this);
+                this.$element.styleSheet.replaceRule("image", {
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover"
+                });
+            });
+        }
+        onUpdateDefaultState(state) {
+            const _super = Object.create(null, {
+                onUpdateDefaultState: { get: () => super.onUpdateDefaultState }
+            });
+            return __awaiter$1(this, void 0, void 0, function* () {
+                yield _super.onUpdateDefaultState.call(this, state);
+                const mediaId = this.$element.getLayoutAttribute("mediaSrc", true);
+                if (!mediaId)
+                    return state;
+                let mediaSrc = null;
+                let fallbackMediaSrc = null;
+                const content = this.$element.referenceService.contentService.getContentById(mediaId);
+                if (content) {
+                    mediaSrc = content.url;
+                    fallbackMediaSrc = content.url;
+                }
+                state.media.mediaId = mediaId;
+                state.media.mediaSrc = mediaSrc;
+                state.media.fallbackMediaSrc = fallbackMediaSrc;
+                state.data.resolution = 0;
+                return state;
+            });
+        }
+        updateMediaUrls() {
+            var _a;
+            return __awaiter$1(this, void 0, void 0, function* () {
+                if (!this.isAttached)
+                    return;
+                const mediaId = this.state.media.mediaId;
+                if (!mediaId)
+                    return;
+                let content = this.$element.referenceService.contentService.getContentById(mediaId);
+                if (!content)
+                    return;
+                let mediaSrc = content.url;
+                let fallbackMediaSrc = content.url;
+                let resolutionIndex = this.state.data.resolution;
+                const processedFormats = ((_a = content === null || content === void 0 ? void 0 : content.processed) === null || _a === void 0 ? void 0 : _a.formats) || [];
+                if (processedFormats && processedFormats.length > 0) {
+                    const processedFormat = processedFormats[0];
+                    const targetResolution = this.mediaTargetResolution;
+                    for (const resolution of processedFormat.resolutions) {
+                        const resSplit = (resolution.resolution || "RESOLUTION_ORIGINAL").split("_");
+                        const res = resSplit[resSplit.length - 1].toLowerCase();
+                        if (targetResolution === res && parseFloat(res) >= resolutionIndex) {
+                            resolutionIndex = parseFloat(res);
+                            mediaSrc = resolution.url;
+                            break;
+                        }
+                    }
+                }
+                fallbackMediaSrc = content === null || content === void 0 ? void 0 : content.url;
+                yield this.changeRuntimeState((state) => {
+                    state.media.mediaSrc = mediaSrc;
+                    state.media.fallbackMediaSrc = fallbackMediaSrc;
+                    state.data.resolution = resolutionIndex;
+                });
+            });
+        }
+        onStateChange(state, paths, forced) {
+            const _super = Object.create(null, {
+                onStateChange: { get: () => super.onStateChange }
+            });
+            return __awaiter$1(this, void 0, void 0, function* () {
+                yield _super.onStateChange.call(this, state, paths, forced);
+                let mediaIdUpdated = forced || false;
+                let mediaUrlsUpdated = forced || false;
+                let mediaDemandedUpdated = forced || false;
+                for (const path of paths) {
+                    if (this.$element.isSubPath(["media", "mediaId"], path)) {
+                        mediaIdUpdated = true;
+                    }
+                    if (this.$element.isSubPath(["media", "mediaSrc"], path) || this.$element.isSubPath(["media", "fallbackMediaSrc"], path)) {
+                        mediaUrlsUpdated = true;
+                    }
+                    if (this.$element.isSubPath(["media", "mediaDemanded"], path)) {
+                        mediaDemandedUpdated = true;
+                    }
+                }
+                if (mediaIdUpdated) {
+                    this.updateMediaUrls();
+                }
+                if (mediaDemandedUpdated) {
+                    this.setupDemandedMedia();
+                }
+                if (mediaUrlsUpdated) {
+                    this.setupDemandedMedia();
+                }
+                this.setupDemandedMedia();
+            });
+        }
+        isVisibleToUserChanged(newVal, oldVal) {
+            return __awaiter$1(this, void 0, void 0, function* () {
+                if (newVal === true && this.state.media.loadBehaviour === "ON_DEMAND" && !this.state.media.mediaDemanded) {
+                    yield this.mediaDemanded();
+                }
+            });
+        }
+        setupDemandedMedia() {
+            return __awaiter$1(this, void 0, void 0, function* () {
+                if (!this.state.media.mediaDemanded)
+                    return;
+                this.mediaSrc = this.state.media.mediaSrc;
+                this.fallbackMediaSrc = this.state.media.fallbackMediaSrc;
+                this.clearMediaLoadBehaviours();
+            });
+        }
+        viewAttaching() {
+            const _super = Object.create(null, {
+                viewAttaching: { get: () => super.viewAttaching }
+            });
+            return __awaiter$1(this, void 0, void 0, function* () {
+                yield _super.viewAttaching.call(this);
+                yield this.setupMediaLoadBehaviours();
+            });
+        }
+        setupMediaLoadBehaviours() {
+            return __awaiter$1(this, void 0, void 0, function* () {
+                if (this.state.media.loadBehaviour === "PRELOAD") {
+                    yield this.mediaDemanded();
+                }
+                else if (this.state.media.loadBehaviour === "ON_DEMAND") {
+                    if (this.$element.isVisibleToUser) {
+                        yield this.mediaDemanded();
+                    }
+                    else {
+                        this.visibilityObserver = this.$element.observeProperty("isVisibleToUser", (newVal, oldVal) => {
+                            this.isVisibleToUserChanged(newVal, oldVal);
+                        });
+                    }
+                }
+            });
+        }
+        mediaDemanded() {
+            return __awaiter$1(this, void 0, void 0, function* () {
+                yield this.changeRuntimeState((state) => {
+                    state.media.mediaDemanded = true;
+                });
+            });
+        }
+        clearMediaLoadBehaviours() {
+            var _a;
+            (_a = this.visibilityObserver) === null || _a === void 0 ? void 0 : _a.dispose();
+        }
+        viewAttached() {
+            const _super = Object.create(null, {
+                viewAttached: { get: () => super.viewAttached }
+            });
+            return __awaiter$1(this, void 0, void 0, function* () {
+                yield _super.viewAttached.call(this);
+                this.resizeObserver = new ResizeObserver(this.imageSizeChanged);
+                this.resizeObserver.observe(this.$element.htmlRef);
+                yield this.updateMediaUrls();
+            });
+        }
+        viewDetaching() {
+            const _super = Object.create(null, {
+                viewDetaching: { get: () => super.viewDetaching }
+            });
+            return __awaiter$1(this, void 0, void 0, function* () {
+                this.resizeObserver.unobserve(this.$element.htmlRef);
+                this.resizeObserver.disconnect();
+                this.clearMediaLoadBehaviours();
+                yield _super.viewDetaching.call(this);
+            });
+        }
+        onViewerResize() {
+            const _super = Object.create(null, {
+                onViewerResize: { get: () => super.onViewerResize }
+            });
+            return __awaiter$1(this, void 0, void 0, function* () {
+                yield _super.onViewerResize.call(this);
+                yield this.updateMediaUrls();
+            });
+        }
+        imageSizeChanged() {
+            return __awaiter$1(this, void 0, void 0, function* () {
+                yield this.updateMediaUrls();
+            });
+        }
+        onResetElement() {
+            const _super = Object.create(null, {
+                onResetElement: { get: () => super.onResetElement }
+            });
+            return __awaiter$1(this, void 0, void 0, function* () {
+                yield _super.onResetElement.call(this);
+                yield this.updateMediaUrls();
+            });
+        }
+        setImage(imageId) {
+            return __awaiter$1(this, void 0, void 0, function* () {
+                yield this.changeRuntimeState((state) => {
+                    state.media.mediaId = imageId;
+                });
+            });
+        }
+        resetImage() {
+            return __awaiter$1(this, void 0, void 0, function* () {
+                this.changeRuntimeState((state) => {
+                    delete state.media.mediaId;
+                    delete state.media.mediaSrc;
+                    delete state.media.fallbackMediaSrc;
+                });
+            });
+        }
+        onObservedAttributeValueChanged(request, value) {
+            const _super = Object.create(null, {
+                onObservedAttributeValueChanged: { get: () => super.onObservedAttributeValueChanged }
+            });
+            return __awaiter$1(this, void 0, void 0, function* () {
+                yield _super.onObservedAttributeValueChanged.call(this, request, value);
+                if (request.id === "mediaSrc") {
+                    if (value.kind === "CUSTOM_ATTRIBUTE") {
+                        yield this.setImage(value.value);
+                    }
+                }
+            });
+        }
+    }
+    Object.defineProperty(KappaElementImage, "$view", {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: html
+    });
+
+    class KappaPluginElementImage extends KappaPluginElement {
+        get name() {
+            return "Image Element";
+        }
+        getRenderer() {
+            return KappaElementImage;
+        }
+    }
+    const attributes = [
+        { name: "mediaSrc", label: "Media", schema: { type: "KAPPA_IMAGE" }, target: "element", isLayoutAttribute: true }
+    ];
+    const methods = [
+        {
+            name: "setImage",
+            label: "Set Image",
+            params: [{ name: "imageId", label: "Image Id", schema: { type: "KAPPA_IMAGE" } }],
+            expressionTemplate: ["Set", "image", "of", { target: "element", type: "target" }, "to", { type: "hole", targetParamName: "imageId" }]
+        },
+        {
+            name: "resetImage",
+            label: "Reset Image",
+            params: [],
+            expressionTemplate: ["Reset", "image", "of", { target: "element", type: "target" }]
+        }
+    ];
+    KappaPluginElementImage.attributes = [...KappaPluginElement.attributes, ...attributes];
+    KappaPluginElementImage.methods = [...KappaPluginElement.methods, ...methods];
+    KappaPluginElementImage.events = [...KappaPluginElement.events];
+
+    registerElementPlugin("KappaPluginElementImage", KappaPluginElementImage);
+
+})();
+//# sourceMappingURL=plugin-element-image.viewer.js.map

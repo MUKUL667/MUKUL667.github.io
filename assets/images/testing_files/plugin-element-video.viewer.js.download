@@ -1,0 +1,2003 @@
+(function () {
+    'use strict';
+
+    /******************************************************************************
+    Copyright (c) Microsoft Corporation.
+
+    Permission to use, copy, modify, and/or distribute this software for any
+    purpose with or without fee is hereby granted.
+
+    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+    REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+    AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+    INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+    LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+    OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+    PERFORMANCE OF THIS SOFTWARE.
+    ***************************************************************************** */
+
+    function __awaiter$1(thisArg, _arguments, P, generator) {
+        function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+        return new (P || (P = Promise))(function (resolve, reject) {
+            function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+            function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+            function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+            step((generator = generator.apply(thisArg, _arguments || [])).next());
+        });
+    }
+
+    var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+
+    var objectPath = {exports: {}};
+
+    (function (module) {
+    	(function (root, factory) {
+
+    	  /*istanbul ignore next:cant test*/
+    	  {
+    	    module.exports = factory();
+    	  }
+    	})(commonjsGlobal, function () {
+
+    	  var toStr = Object.prototype.toString;
+
+    	  function hasOwnProperty (obj, prop) {
+    	    if (obj == null) {
+    	      return false
+    	    }
+    	    //to handle objects with null prototypes (too edge case?)
+    	    return Object.prototype.hasOwnProperty.call(obj, prop)
+    	  }
+
+    	  function isEmpty (value) {
+    	    if (!value) {
+    	      return true
+    	    }
+    	    if (isArray(value) && value.length === 0) {
+    	      return true
+    	    } else if (typeof value !== 'string') {
+    	      for (var i in value) {
+    	        if (hasOwnProperty(value, i)) {
+    	          return false
+    	        }
+    	      }
+    	      return true
+    	    }
+    	    return false
+    	  }
+
+    	  function toString (type) {
+    	    return toStr.call(type)
+    	  }
+
+    	  function isObject (obj) {
+    	    return typeof obj === 'object' && toString(obj) === '[object Object]'
+    	  }
+
+    	  var isArray = Array.isArray || function (obj) {
+    	    /*istanbul ignore next:cant test*/
+    	    return toStr.call(obj) === '[object Array]'
+    	  };
+
+    	  function isBoolean (obj) {
+    	    return typeof obj === 'boolean' || toString(obj) === '[object Boolean]'
+    	  }
+
+    	  function getKey (key) {
+    	    var intKey = parseInt(key);
+    	    if (intKey.toString() === key) {
+    	      return intKey
+    	    }
+    	    return key
+    	  }
+
+    	  function factory (options) {
+    	    options = options || {};
+
+    	    var objectPath = function (obj) {
+    	      return Object.keys(objectPath).reduce(function (proxy, prop) {
+    	        if (prop === 'create') {
+    	          return proxy
+    	        }
+
+    	        /*istanbul ignore else*/
+    	        if (typeof objectPath[prop] === 'function') {
+    	          proxy[prop] = objectPath[prop].bind(objectPath, obj);
+    	        }
+
+    	        return proxy
+    	      }, {})
+    	    };
+
+    	    var hasShallowProperty;
+    	    if (options.includeInheritedProps) {
+    	      hasShallowProperty = function () {
+    	        return true
+    	      };
+    	    } else {
+    	      hasShallowProperty = function (obj, prop) {
+    	        return (typeof prop === 'number' && Array.isArray(obj)) || hasOwnProperty(obj, prop)
+    	      };
+    	    }
+
+    	    function getShallowProperty (obj, prop) {
+    	      if (hasShallowProperty(obj, prop)) {
+    	        return obj[prop]
+    	      }
+    	    }
+
+    	    var getShallowPropertySafely;
+    	    if (options.includeInheritedProps) {
+    	      getShallowPropertySafely = function (obj, currentPath) {
+    	        if (typeof currentPath !== 'string' && typeof currentPath !== 'number') {
+    	          currentPath = String(currentPath);
+    	        }
+    	        var currentValue = getShallowProperty(obj, currentPath);
+    	        if (currentPath === '__proto__' || currentPath === 'prototype' ||
+    	          (currentPath === 'constructor' && typeof currentValue === 'function')) {
+    	          throw new Error('For security reasons, object\'s magic properties cannot be set')
+    	        }
+    	        return currentValue
+    	      };
+    	    } else {
+    	      getShallowPropertySafely = function (obj, currentPath) {
+    	        return getShallowProperty(obj, currentPath)
+    	      };
+    	    }
+
+    	    function set (obj, path, value, doNotReplace) {
+    	      if (typeof path === 'number') {
+    	        path = [path];
+    	      }
+    	      if (!path || path.length === 0) {
+    	        return obj
+    	      }
+    	      if (typeof path === 'string') {
+    	        return set(obj, path.split('.').map(getKey), value, doNotReplace)
+    	      }
+    	      var currentPath = path[0];
+    	      var currentValue = getShallowPropertySafely(obj, currentPath);
+    	      if (path.length === 1) {
+    	        if (currentValue === void 0 || !doNotReplace) {
+    	          obj[currentPath] = value;
+    	        }
+    	        return currentValue
+    	      }
+
+    	      if (currentValue === void 0) {
+    	        //check if we assume an array
+    	        if (typeof path[1] === 'number') {
+    	          obj[currentPath] = [];
+    	        } else {
+    	          obj[currentPath] = {};
+    	        }
+    	      }
+
+    	      return set(obj[currentPath], path.slice(1), value, doNotReplace)
+    	    }
+
+    	    objectPath.has = function (obj, path) {
+    	      if (typeof path === 'number') {
+    	        path = [path];
+    	      } else if (typeof path === 'string') {
+    	        path = path.split('.');
+    	      }
+
+    	      if (!path || path.length === 0) {
+    	        return !!obj
+    	      }
+
+    	      for (var i = 0; i < path.length; i++) {
+    	        var j = getKey(path[i]);
+
+    	        if ((typeof j === 'number' && isArray(obj) && j < obj.length) ||
+    	          (options.includeInheritedProps ? (j in Object(obj)) : hasOwnProperty(obj, j))) {
+    	          obj = obj[j];
+    	        } else {
+    	          return false
+    	        }
+    	      }
+
+    	      return true
+    	    };
+
+    	    objectPath.ensureExists = function (obj, path, value) {
+    	      return set(obj, path, value, true)
+    	    };
+
+    	    objectPath.set = function (obj, path, value, doNotReplace) {
+    	      return set(obj, path, value, doNotReplace)
+    	    };
+
+    	    objectPath.insert = function (obj, path, value, at) {
+    	      var arr = objectPath.get(obj, path);
+    	      at = ~~at;
+    	      if (!isArray(arr)) {
+    	        arr = [];
+    	        objectPath.set(obj, path, arr);
+    	      }
+    	      arr.splice(at, 0, value);
+    	    };
+
+    	    objectPath.empty = function (obj, path) {
+    	      if (isEmpty(path)) {
+    	        return void 0
+    	      }
+    	      if (obj == null) {
+    	        return void 0
+    	      }
+
+    	      var value, i;
+    	      if (!(value = objectPath.get(obj, path))) {
+    	        return void 0
+    	      }
+
+    	      if (typeof value === 'string') {
+    	        return objectPath.set(obj, path, '')
+    	      } else if (isBoolean(value)) {
+    	        return objectPath.set(obj, path, false)
+    	      } else if (typeof value === 'number') {
+    	        return objectPath.set(obj, path, 0)
+    	      } else if (isArray(value)) {
+    	        value.length = 0;
+    	      } else if (isObject(value)) {
+    	        for (i in value) {
+    	          if (hasShallowProperty(value, i)) {
+    	            delete value[i];
+    	          }
+    	        }
+    	      } else {
+    	        return objectPath.set(obj, path, null)
+    	      }
+    	    };
+
+    	    objectPath.push = function (obj, path /*, values */) {
+    	      var arr = objectPath.get(obj, path);
+    	      if (!isArray(arr)) {
+    	        arr = [];
+    	        objectPath.set(obj, path, arr);
+    	      }
+
+    	      arr.push.apply(arr, Array.prototype.slice.call(arguments, 2));
+    	    };
+
+    	    objectPath.coalesce = function (obj, paths, defaultValue) {
+    	      var value;
+
+    	      for (var i = 0, len = paths.length; i < len; i++) {
+    	        if ((value = objectPath.get(obj, paths[i])) !== void 0) {
+    	          return value
+    	        }
+    	      }
+
+    	      return defaultValue
+    	    };
+
+    	    objectPath.get = function (obj, path, defaultValue) {
+    	      if (typeof path === 'number') {
+    	        path = [path];
+    	      }
+    	      if (!path || path.length === 0) {
+    	        return obj
+    	      }
+    	      if (obj == null) {
+    	        return defaultValue
+    	      }
+    	      if (typeof path === 'string') {
+    	        return objectPath.get(obj, path.split('.'), defaultValue)
+    	      }
+
+    	      var currentPath = getKey(path[0]);
+    	      var nextObj = getShallowPropertySafely(obj, currentPath);
+    	      if (nextObj === void 0) {
+    	        return defaultValue
+    	      }
+
+    	      if (path.length === 1) {
+    	        return nextObj
+    	      }
+
+    	      return objectPath.get(obj[currentPath], path.slice(1), defaultValue)
+    	    };
+
+    	    objectPath.del = function del (obj, path) {
+    	      if (typeof path === 'number') {
+    	        path = [path];
+    	      }
+
+    	      if (obj == null) {
+    	        return obj
+    	      }
+
+    	      if (isEmpty(path)) {
+    	        return obj
+    	      }
+    	      if (typeof path === 'string') {
+    	        return objectPath.del(obj, path.split('.'))
+    	      }
+
+    	      var currentPath = getKey(path[0]);
+    	      getShallowPropertySafely(obj, currentPath);
+    	      if (!hasShallowProperty(obj, currentPath)) {
+    	        return obj
+    	      }
+
+    	      if (path.length === 1) {
+    	        if (isArray(obj)) {
+    	          obj.splice(currentPath, 1);
+    	        } else {
+    	          delete obj[currentPath];
+    	        }
+    	      } else {
+    	        return objectPath.del(obj[currentPath], path.slice(1))
+    	      }
+
+    	      return obj
+    	    };
+
+    	    return objectPath
+    	  }
+
+    	  var mod = factory();
+    	  mod.create = factory;
+    	  mod.withInheritedProps = factory({includeInheritedProps: true});
+    	  return mod
+    	});
+    } (objectPath));
+
+    /**
+     * Checks if `value` is the
+     * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
+     * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+     *
+     * @static
+     * @memberOf _
+     * @since 0.1.0
+     * @category Lang
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+     * @example
+     *
+     * _.isObject({});
+     * // => true
+     *
+     * _.isObject([1, 2, 3]);
+     * // => true
+     *
+     * _.isObject(_.noop);
+     * // => true
+     *
+     * _.isObject(null);
+     * // => false
+     */
+
+    function isObject$2(value) {
+      var type = typeof value;
+      return value != null && (type == 'object' || type == 'function');
+    }
+
+    var isObject_1 = isObject$2;
+
+    /** Detect free variable `global` from Node.js. */
+
+    var freeGlobal$1 = typeof commonjsGlobal == 'object' && commonjsGlobal && commonjsGlobal.Object === Object && commonjsGlobal;
+
+    var _freeGlobal = freeGlobal$1;
+
+    var freeGlobal = _freeGlobal;
+
+    /** Detect free variable `self`. */
+    var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
+
+    /** Used as a reference to the global object. */
+    var root$2 = freeGlobal || freeSelf || Function('return this')();
+
+    var _root = root$2;
+
+    var root$1 = _root;
+
+    /**
+     * Gets the timestamp of the number of milliseconds that have elapsed since
+     * the Unix epoch (1 January 1970 00:00:00 UTC).
+     *
+     * @static
+     * @memberOf _
+     * @since 2.4.0
+     * @category Date
+     * @returns {number} Returns the timestamp.
+     * @example
+     *
+     * _.defer(function(stamp) {
+     *   console.log(_.now() - stamp);
+     * }, _.now());
+     * // => Logs the number of milliseconds it took for the deferred invocation.
+     */
+    var now$1 = function() {
+      return root$1.Date.now();
+    };
+
+    var now_1 = now$1;
+
+    /** Used to match a single whitespace character. */
+
+    var reWhitespace = /\s/;
+
+    /**
+     * Used by `_.trim` and `_.trimEnd` to get the index of the last non-whitespace
+     * character of `string`.
+     *
+     * @private
+     * @param {string} string The string to inspect.
+     * @returns {number} Returns the index of the last non-whitespace character.
+     */
+    function trimmedEndIndex$1(string) {
+      var index = string.length;
+
+      while (index-- && reWhitespace.test(string.charAt(index))) {}
+      return index;
+    }
+
+    var _trimmedEndIndex = trimmedEndIndex$1;
+
+    var trimmedEndIndex = _trimmedEndIndex;
+
+    /** Used to match leading whitespace. */
+    var reTrimStart = /^\s+/;
+
+    /**
+     * The base implementation of `_.trim`.
+     *
+     * @private
+     * @param {string} string The string to trim.
+     * @returns {string} Returns the trimmed string.
+     */
+    function baseTrim$1(string) {
+      return string
+        ? string.slice(0, trimmedEndIndex(string) + 1).replace(reTrimStart, '')
+        : string;
+    }
+
+    var _baseTrim = baseTrim$1;
+
+    var root = _root;
+
+    /** Built-in value references. */
+    var Symbol$2 = root.Symbol;
+
+    var _Symbol = Symbol$2;
+
+    var Symbol$1 = _Symbol;
+
+    /** Used for built-in method references. */
+    var objectProto$1 = Object.prototype;
+
+    /** Used to check objects for own properties. */
+    var hasOwnProperty = objectProto$1.hasOwnProperty;
+
+    /**
+     * Used to resolve the
+     * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+     * of values.
+     */
+    var nativeObjectToString$1 = objectProto$1.toString;
+
+    /** Built-in value references. */
+    var symToStringTag$1 = Symbol$1 ? Symbol$1.toStringTag : undefined;
+
+    /**
+     * A specialized version of `baseGetTag` which ignores `Symbol.toStringTag` values.
+     *
+     * @private
+     * @param {*} value The value to query.
+     * @returns {string} Returns the raw `toStringTag`.
+     */
+    function getRawTag$1(value) {
+      var isOwn = hasOwnProperty.call(value, symToStringTag$1),
+          tag = value[symToStringTag$1];
+
+      try {
+        value[symToStringTag$1] = undefined;
+        var unmasked = true;
+      } catch (e) {}
+
+      var result = nativeObjectToString$1.call(value);
+      if (unmasked) {
+        if (isOwn) {
+          value[symToStringTag$1] = tag;
+        } else {
+          delete value[symToStringTag$1];
+        }
+      }
+      return result;
+    }
+
+    var _getRawTag = getRawTag$1;
+
+    /** Used for built-in method references. */
+
+    var objectProto = Object.prototype;
+
+    /**
+     * Used to resolve the
+     * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+     * of values.
+     */
+    var nativeObjectToString = objectProto.toString;
+
+    /**
+     * Converts `value` to a string using `Object.prototype.toString`.
+     *
+     * @private
+     * @param {*} value The value to convert.
+     * @returns {string} Returns the converted string.
+     */
+    function objectToString$1(value) {
+      return nativeObjectToString.call(value);
+    }
+
+    var _objectToString = objectToString$1;
+
+    var Symbol = _Symbol,
+        getRawTag = _getRawTag,
+        objectToString = _objectToString;
+
+    /** `Object#toString` result references. */
+    var nullTag = '[object Null]',
+        undefinedTag = '[object Undefined]';
+
+    /** Built-in value references. */
+    var symToStringTag = Symbol ? Symbol.toStringTag : undefined;
+
+    /**
+     * The base implementation of `getTag` without fallbacks for buggy environments.
+     *
+     * @private
+     * @param {*} value The value to query.
+     * @returns {string} Returns the `toStringTag`.
+     */
+    function baseGetTag$1(value) {
+      if (value == null) {
+        return value === undefined ? undefinedTag : nullTag;
+      }
+      return (symToStringTag && symToStringTag in Object(value))
+        ? getRawTag(value)
+        : objectToString(value);
+    }
+
+    var _baseGetTag = baseGetTag$1;
+
+    /**
+     * Checks if `value` is object-like. A value is object-like if it's not `null`
+     * and has a `typeof` result of "object".
+     *
+     * @static
+     * @memberOf _
+     * @since 4.0.0
+     * @category Lang
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+     * @example
+     *
+     * _.isObjectLike({});
+     * // => true
+     *
+     * _.isObjectLike([1, 2, 3]);
+     * // => true
+     *
+     * _.isObjectLike(_.noop);
+     * // => false
+     *
+     * _.isObjectLike(null);
+     * // => false
+     */
+
+    function isObjectLike$1(value) {
+      return value != null && typeof value == 'object';
+    }
+
+    var isObjectLike_1 = isObjectLike$1;
+
+    var baseGetTag = _baseGetTag,
+        isObjectLike = isObjectLike_1;
+
+    /** `Object#toString` result references. */
+    var symbolTag = '[object Symbol]';
+
+    /**
+     * Checks if `value` is classified as a `Symbol` primitive or object.
+     *
+     * @static
+     * @memberOf _
+     * @since 4.0.0
+     * @category Lang
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
+     * @example
+     *
+     * _.isSymbol(Symbol.iterator);
+     * // => true
+     *
+     * _.isSymbol('abc');
+     * // => false
+     */
+    function isSymbol$1(value) {
+      return typeof value == 'symbol' ||
+        (isObjectLike(value) && baseGetTag(value) == symbolTag);
+    }
+
+    var isSymbol_1 = isSymbol$1;
+
+    var baseTrim = _baseTrim,
+        isObject$1 = isObject_1,
+        isSymbol = isSymbol_1;
+
+    /** Used as references for various `Number` constants. */
+    var NAN = 0 / 0;
+
+    /** Used to detect bad signed hexadecimal string values. */
+    var reIsBadHex = /^[-+]0x[0-9a-f]+$/i;
+
+    /** Used to detect binary string values. */
+    var reIsBinary = /^0b[01]+$/i;
+
+    /** Used to detect octal string values. */
+    var reIsOctal = /^0o[0-7]+$/i;
+
+    /** Built-in method references without a dependency on `root`. */
+    var freeParseInt = parseInt;
+
+    /**
+     * Converts `value` to a number.
+     *
+     * @static
+     * @memberOf _
+     * @since 4.0.0
+     * @category Lang
+     * @param {*} value The value to process.
+     * @returns {number} Returns the number.
+     * @example
+     *
+     * _.toNumber(3.2);
+     * // => 3.2
+     *
+     * _.toNumber(Number.MIN_VALUE);
+     * // => 5e-324
+     *
+     * _.toNumber(Infinity);
+     * // => Infinity
+     *
+     * _.toNumber('3.2');
+     * // => 3.2
+     */
+    function toNumber$1(value) {
+      if (typeof value == 'number') {
+        return value;
+      }
+      if (isSymbol(value)) {
+        return NAN;
+      }
+      if (isObject$1(value)) {
+        var other = typeof value.valueOf == 'function' ? value.valueOf() : value;
+        value = isObject$1(other) ? (other + '') : other;
+      }
+      if (typeof value != 'string') {
+        return value === 0 ? value : +value;
+      }
+      value = baseTrim(value);
+      var isBinary = reIsBinary.test(value);
+      return (isBinary || reIsOctal.test(value))
+        ? freeParseInt(value.slice(2), isBinary ? 2 : 8)
+        : (reIsBadHex.test(value) ? NAN : +value);
+    }
+
+    var toNumber_1 = toNumber$1;
+
+    var isObject = isObject_1,
+        now = now_1,
+        toNumber = toNumber_1;
+
+    /** Error message constants. */
+    var FUNC_ERROR_TEXT = 'Expected a function';
+
+    /* Built-in method references for those with the same name as other `lodash` methods. */
+    var nativeMax = Math.max,
+        nativeMin = Math.min;
+
+    /**
+     * Creates a debounced function that delays invoking `func` until after `wait`
+     * milliseconds have elapsed since the last time the debounced function was
+     * invoked. The debounced function comes with a `cancel` method to cancel
+     * delayed `func` invocations and a `flush` method to immediately invoke them.
+     * Provide `options` to indicate whether `func` should be invoked on the
+     * leading and/or trailing edge of the `wait` timeout. The `func` is invoked
+     * with the last arguments provided to the debounced function. Subsequent
+     * calls to the debounced function return the result of the last `func`
+     * invocation.
+     *
+     * **Note:** If `leading` and `trailing` options are `true`, `func` is
+     * invoked on the trailing edge of the timeout only if the debounced function
+     * is invoked more than once during the `wait` timeout.
+     *
+     * If `wait` is `0` and `leading` is `false`, `func` invocation is deferred
+     * until to the next tick, similar to `setTimeout` with a timeout of `0`.
+     *
+     * See [David Corbacho's article](https://css-tricks.com/debouncing-throttling-explained-examples/)
+     * for details over the differences between `_.debounce` and `_.throttle`.
+     *
+     * @static
+     * @memberOf _
+     * @since 0.1.0
+     * @category Function
+     * @param {Function} func The function to debounce.
+     * @param {number} [wait=0] The number of milliseconds to delay.
+     * @param {Object} [options={}] The options object.
+     * @param {boolean} [options.leading=false]
+     *  Specify invoking on the leading edge of the timeout.
+     * @param {number} [options.maxWait]
+     *  The maximum time `func` is allowed to be delayed before it's invoked.
+     * @param {boolean} [options.trailing=true]
+     *  Specify invoking on the trailing edge of the timeout.
+     * @returns {Function} Returns the new debounced function.
+     * @example
+     *
+     * // Avoid costly calculations while the window size is in flux.
+     * jQuery(window).on('resize', _.debounce(calculateLayout, 150));
+     *
+     * // Invoke `sendMail` when clicked, debouncing subsequent calls.
+     * jQuery(element).on('click', _.debounce(sendMail, 300, {
+     *   'leading': true,
+     *   'trailing': false
+     * }));
+     *
+     * // Ensure `batchLog` is invoked once after 1 second of debounced calls.
+     * var debounced = _.debounce(batchLog, 250, { 'maxWait': 1000 });
+     * var source = new EventSource('/stream');
+     * jQuery(source).on('message', debounced);
+     *
+     * // Cancel the trailing debounced invocation.
+     * jQuery(window).on('popstate', debounced.cancel);
+     */
+    function debounce$1(func, wait, options) {
+      var lastArgs,
+          lastThis,
+          maxWait,
+          result,
+          timerId,
+          lastCallTime,
+          lastInvokeTime = 0,
+          leading = false,
+          maxing = false,
+          trailing = true;
+
+      if (typeof func != 'function') {
+        throw new TypeError(FUNC_ERROR_TEXT);
+      }
+      wait = toNumber(wait) || 0;
+      if (isObject(options)) {
+        leading = !!options.leading;
+        maxing = 'maxWait' in options;
+        maxWait = maxing ? nativeMax(toNumber(options.maxWait) || 0, wait) : maxWait;
+        trailing = 'trailing' in options ? !!options.trailing : trailing;
+      }
+
+      function invokeFunc(time) {
+        var args = lastArgs,
+            thisArg = lastThis;
+
+        lastArgs = lastThis = undefined;
+        lastInvokeTime = time;
+        result = func.apply(thisArg, args);
+        return result;
+      }
+
+      function leadingEdge(time) {
+        // Reset any `maxWait` timer.
+        lastInvokeTime = time;
+        // Start the timer for the trailing edge.
+        timerId = setTimeout(timerExpired, wait);
+        // Invoke the leading edge.
+        return leading ? invokeFunc(time) : result;
+      }
+
+      function remainingWait(time) {
+        var timeSinceLastCall = time - lastCallTime,
+            timeSinceLastInvoke = time - lastInvokeTime,
+            timeWaiting = wait - timeSinceLastCall;
+
+        return maxing
+          ? nativeMin(timeWaiting, maxWait - timeSinceLastInvoke)
+          : timeWaiting;
+      }
+
+      function shouldInvoke(time) {
+        var timeSinceLastCall = time - lastCallTime,
+            timeSinceLastInvoke = time - lastInvokeTime;
+
+        // Either this is the first call, activity has stopped and we're at the
+        // trailing edge, the system time has gone backwards and we're treating
+        // it as the trailing edge, or we've hit the `maxWait` limit.
+        return (lastCallTime === undefined || (timeSinceLastCall >= wait) ||
+          (timeSinceLastCall < 0) || (maxing && timeSinceLastInvoke >= maxWait));
+      }
+
+      function timerExpired() {
+        var time = now();
+        if (shouldInvoke(time)) {
+          return trailingEdge(time);
+        }
+        // Restart the timer.
+        timerId = setTimeout(timerExpired, remainingWait(time));
+      }
+
+      function trailingEdge(time) {
+        timerId = undefined;
+
+        // Only invoke if we have `lastArgs` which means `func` has been
+        // debounced at least once.
+        if (trailing && lastArgs) {
+          return invokeFunc(time);
+        }
+        lastArgs = lastThis = undefined;
+        return result;
+      }
+
+      function cancel() {
+        if (timerId !== undefined) {
+          clearTimeout(timerId);
+        }
+        lastInvokeTime = 0;
+        lastArgs = lastCallTime = lastThis = timerId = undefined;
+      }
+
+      function flush() {
+        return timerId === undefined ? result : trailingEdge(now());
+      }
+
+      function debounced() {
+        var time = now(),
+            isInvoking = shouldInvoke(time);
+
+        lastArgs = arguments;
+        lastThis = this;
+        lastCallTime = time;
+
+        if (isInvoking) {
+          if (timerId === undefined) {
+            return leadingEdge(lastCallTime);
+          }
+          if (maxing) {
+            // Handle invocations in a tight loop.
+            clearTimeout(timerId);
+            timerId = setTimeout(timerExpired, wait);
+            return invokeFunc(lastCallTime);
+          }
+        }
+        if (timerId === undefined) {
+          timerId = setTimeout(timerExpired, wait);
+        }
+        return result;
+      }
+      debounced.cancel = cancel;
+      debounced.flush = flush;
+      return debounced;
+    }
+
+    var debounce_1 = debounce$1;
+
+    var lDebounce = debounce_1;
+
+    /******************************************************************************
+    Copyright (c) Microsoft Corporation.
+
+    Permission to use, copy, modify, and/or distribute this software for any
+    purpose with or without fee is hereby granted.
+
+    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+    REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+    AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+    INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+    LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+    OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+    PERFORMANCE OF THIS SOFTWARE.
+    ***************************************************************************** */
+
+    function __awaiter(thisArg, _arguments, P, generator) {
+        function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+        return new (P || (P = Promise))(function (resolve, reject) {
+            function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+            function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+            function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+            step((generator = generator.apply(thisArg, _arguments || [])).next());
+        });
+    }
+    function isElementPlugin(plugin) {
+        if (plugin.type === "ElementPlugin")
+            return true;
+        return false;
+    }
+    function isAureliaElementPlugin(plugin) {
+        if (isElementPlugin(plugin) && plugin.kind === "AureliaComponent")
+            return true;
+        return false;
+    }
+
+    class KappaTimer {
+        constructor(callback) {
+            Object.defineProperty(this, "callback", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: callback
+            });
+            Object.defineProperty(this, "_selfValue", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: 0
+            });
+            Object.defineProperty(this, "_externalValue", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: 0
+            });
+            Object.defineProperty(this, "previousTimestamp", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: 0
+            });
+            Object.defineProperty(this, "shouldStop", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: false
+            });
+            Object.defineProperty(this, "_isRunning", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: false
+            });
+            Object.defineProperty(this, "exernalTimer", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: null
+            });
+            this.rafCallback = this.rafCallback.bind(this);
+        }
+        setupExternalTimer(externalTimer) {
+            this.exernalTimer = externalTimer;
+        }
+        /**
+         *
+         * @param time milliseconds
+         */
+        start(time = null) {
+            if (typeof time === "number") {
+                if (window["debugNow"])
+                    debugger;
+                this._selfValue = time;
+                if (this.exernalTimer) {
+                    this.exernalTimer.setTime(time);
+                }
+            }
+            this.shouldStop = false;
+            window.requestAnimationFrame(this.rafCallback);
+            this.previousTimestamp = Date.now();
+            this._isRunning = true;
+        }
+        stop() {
+            this.shouldStop = true;
+        }
+        reset() {
+            this.stop();
+            this._selfValue = 0;
+        }
+        rafCallback() {
+            const currentTimestamp = Date.now();
+            if (!this.shouldStop) {
+                this._selfValue += currentTimestamp - this.previousTimestamp;
+                this.updateExternalValue();
+                this.previousTimestamp = currentTimestamp;
+                window.requestAnimationFrame(this.rafCallback);
+                this.triggerCallback();
+            }
+            else {
+                this._selfValue += currentTimestamp - this.previousTimestamp;
+                this.updateExternalValue();
+                this._isRunning = false;
+            }
+        }
+        setValue(value) {
+            this._selfValue = value;
+        }
+        destroy() {
+            delete this.callback;
+        }
+        updateExternalValue() {
+            if (this.exernalTimer) {
+                this._externalValue = this.exernalTimer.getTime();
+            }
+        }
+        triggerCallback() {
+            this.callback && this.callback(this.value);
+        }
+        get value() {
+            if (this.exernalTimer) {
+                return this._externalValue;
+            }
+            return this._selfValue;
+        }
+        get internalValue() {
+            return this._selfValue;
+        }
+        get running() {
+            return this._isRunning;
+        }
+    }
+
+    function debounce(func, wait, options) {
+        return lDebounce(func, wait, options);
+    }
+    function registerElementPlugin(name, plugin) {
+        objectPath.exports.set(window, `kp.element.${name}`, plugin);
+    }
+    class KappaPluginBase {
+        constructor() {
+            Object.defineProperty(this, "_isReady", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+            Object.defineProperty(this, "_pluginConfig", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+        }
+        get pluginConfig() {
+            return this._pluginConfig;
+        }
+        get isReady() {
+            return this._isReady;
+        }
+        get name() {
+            return "";
+        }
+        get configurable() {
+            return false;
+        }
+        setup(config) {
+            return __awaiter(this, void 0, void 0, function* () {
+                throw new Error('Method not implemented.');
+            });
+        }
+        getMethod(name) {
+            if (this[name] && typeof this[name] === "function") {
+                return this[name].bind(this);
+            }
+            return null;
+        }
+    }
+    Object.defineProperty(KappaPluginBase, "attributes", {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: []
+    });
+    Object.defineProperty(KappaPluginBase, "methods", {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: []
+    });
+    Object.defineProperty(KappaPluginBase, "events", {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: []
+    });
+
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    class KappaPluginElement extends KappaPluginBase {
+        _elementRenderer;
+        get name() {
+            return "Element";
+        }
+        async setup(config) {
+            this._pluginConfig = config.plugin;
+            if (!isAureliaElementPlugin(config.plugin)) {
+                console.error("Not a Valid Aurelia Component Plugin: ", config.plugin);
+                return;
+            }
+            const renderer = this.getRenderer();
+            this._elementRenderer = renderer;
+            this._isReady = true;
+        }
+        ;
+        getRenderer() {
+            throw Error("Not Implemented");
+        }
+        elementRenderer() {
+            return this._elementRenderer;
+        }
+        // Define Static inside Definition to make it Tree Shakable
+        static attributes = [
+            { name: "stackWidthConstraint", label: "Stack Width Constraint", schema: { type: "STRING" }, target: "element", isLayoutAttribute: true },
+            { name: "stackHeightConstraint", label: "Stack Height Constraint", schema: { type: "STRING" }, target: "element", isLayoutAttribute: true }
+        ];
+        static events = [
+            { name: "ElementShow", label: "Show", emitter: "element" },
+            { name: "ElementHide", label: "Hide", emitter: "element" },
+            { name: "ElementClick", label: "Click", emitter: "element" }
+        ];
+        static methods = [
+            {
+                name: "isVisible",
+                label: "Is Visible",
+                params: [],
+                schema: { type: "BOOLEAN" },
+                expressionTemplate: ["Is", { target: "element", type: "target" }, "Visible"]
+            },
+            {
+                name: "isHidden",
+                label: "Is Hidden",
+                params: [],
+                schema: { type: "BOOLEAN" },
+                expressionTemplate: ["Is", { target: "element", type: "target" }, "Hidden"]
+            },
+            {
+                name: "show",
+                label: "Show",
+                params: [],
+                expressionTemplate: ["Show", { target: "element", type: "target" }]
+            },
+            {
+                name: "hide",
+                label: "Hide",
+                params: [],
+                expressionTemplate: ["Hide", { target: "element", type: "target" }]
+            },
+            {
+                name: "forceShow",
+                label: "Force Show",
+                params: [],
+                expressionTemplate: ["Force Show", { target: "element", type: "target" }]
+            },
+            {
+                name: "forceHide",
+                label: "Force Hide",
+                params: [],
+                expressionTemplate: ["Force Hide", { target: "element", type: "target" }]
+            },
+            {
+                name: "clearForceVisibility",
+                label: "Clear Force Visibility",
+                params: [],
+                expressionTemplate: ["Clear Force Visibility", "of", { target: "element", type: "target" }]
+            },
+            {
+                name: "setX",
+                label: "Set X",
+                params: [{ name: "x", label: "X", schema: { type: "NUMBER" } }],
+                expressionTemplate: ["Set", "X", "of", { target: "element", type: "target" }, "to", { type: "hole", targetParamName: "x" }]
+            },
+            {
+                name: "setY",
+                label: "Set Y",
+                params: [{ name: "y", label: "Y", schema: { type: "NUMBER" } }],
+                expressionTemplate: ["Set", "Y", "of", { target: "element", type: "target" }, "to", { type: "hole", targetParamName: "y" }]
+            },
+            {
+                name: "setWidth",
+                label: "Set Width",
+                params: [{ name: "width", label: "Width", schema: { type: "NUMBER" } }],
+                expressionTemplate: ["Set", "width", "of", { target: "element", type: "target" }, "to", { type: "hole", targetParamName: "width" }]
+            },
+            {
+                name: "setHeight",
+                label: "Set Height",
+                params: [{ name: "height", label: "Height", schema: { type: "NUMBER" } }],
+                expressionTemplate: ["Set", "height", "of", { target: "element", type: "target" }, "to", { type: "hole", targetParamName: "height" }]
+            },
+            {
+                name: "setBorderRadius",
+                label: "Set Border Radius",
+                params: [{ name: "radius", label: "Radius", schema: { type: "NUMBER" } }],
+                expressionTemplate: ["Set", "border radius", "of", { target: "element", type: "target" }, "to", { type: "hole", targetParamName: "radius" }]
+            },
+            {
+                name: "setOpacity",
+                label: "Set Opacity",
+                params: [{ name: "opacity", label: "Opacity", schema: { type: "NUMBER" } }],
+                expressionTemplate: ["Set", "opacity", "of", { target: "element", type: "target" }, "to", { type: "hole", targetParamName: "opacity" }]
+            },
+            {
+                name: "setBgColor",
+                label: "Set Background Color",
+                params: [{ name: "color", label: "Color", schema: { type: "COLOR" } }],
+                expressionTemplate: ["Set", "background color", "of", { target: "element", type: "target" }, "to", { type: "hole", targetParamName: "color" }]
+            }
+        ];
+    }
+
+    class KappaPluginTimelineElement extends KappaPluginElement {
+        get name() {
+            return "Timeline Element";
+        }
+        // Define Static inside Definition to make it Tree Shakable
+        static events = [
+            ...KappaPluginElement.events,
+            { name: "ElementPlay", label: "Play", emitter: "element" },
+            { name: "ElementPause", label: "Pause", emitter: "element" },
+            { name: "ElementSeek", label: "Seek", schema: { type: "NUMBER" }, emitter: "element" },
+            { name: "ElementSeeked", label: "Seek Complete", schema: { type: "NUMBER" }, emitter: "element" },
+            { name: "ElementTime", label: "Time", schema: { type: "NUMBER" }, emitter: "element" }
+        ];
+        static methods = [
+            ...KappaPluginElement.methods,
+            {
+                name: "play",
+                label: "Play",
+                params: [],
+                expressionTemplate: ["Play", { target: "element", type: "target" }]
+            },
+            {
+                name: "pause",
+                label: "Pause",
+                params: [],
+                expressionTemplate: ["Pause", { target: "element", type: "target" }]
+            }
+        ];
+    }
+
+    class KappaElementRenderer {
+        element;
+        constructor(element) {
+            this.element = element;
+        }
+        get $element() {
+            return this.element;
+        }
+        get $renderer() {
+            return this;
+        }
+        get isAttached() {
+            return this.$element.isAttached;
+        }
+        get state() {
+            return this.$element.state;
+        }
+        elementCreated() { }
+        async elementBinding() { }
+        async elementBound() { }
+        async viewAttaching() { }
+        async viewAttached() { }
+        async viewDetaching() { }
+        async viewDetached() { }
+        async onViewerMute() { }
+        async onViewerUnmute() { }
+        async onViewerPause() { }
+        async onViewerPlay() { }
+        async onViewerResize() { }
+        async onProcessData() { }
+        async onProcessPose() { }
+        async onProcessStyle() { }
+        getMethod(name) {
+            if (this[name] && typeof this[name] === "function") {
+                return this[name].bind(this);
+            }
+            return null;
+        }
+        async changeRuntimeState(callback) {
+            return await this.$element?.changeRuntimeState(callback);
+        }
+        changeRuntimeCurrentTime(currentTime) {
+            this.$element?.changeRuntimeCurrentTime(currentTime);
+        }
+        async onStateChange(state, paths, forced) { }
+        async onChildStateChange(childId, state, paths) { }
+        async onUpdateDefaultState(state) {
+            return state;
+        }
+        async onResetElement() { }
+        async onSetupAttributeObservers() { }
+        async onObservedAttributeValueChanged(request, value) { }
+    }
+
+    class KappaTimelineElementRenderer extends KappaElementRenderer {
+        timer;
+        _startedPlaying = false;
+        _muted = true;
+        _playing = false;
+        stateBeforeViewerPause;
+        constructor(element) {
+            super(element);
+            this._updateTime = this._updateTime.bind(this);
+            this.timer = new KappaTimer(this._updateTime);
+        }
+        get shouldPauseOnViewerPause() {
+            return true;
+        }
+        get playing() {
+            return this.state?.timeline?.playing || false;
+        }
+        get seekable() {
+            return false;
+        }
+        async onResetElement() {
+            await this.pause();
+            delete (this.stateBeforeViewerPause);
+            await super.onResetElement();
+        }
+        async onViewerPause() {
+            await super.onViewerPause();
+            // if (this.stateBeforeViewerPause) return // Dont Run if already paused due to viewer
+            this.stateBeforeViewerPause = {
+                playing: this.state?.timeline?.playing || false,
+                time: this.currentTime()
+            };
+            await this.pause(false);
+        }
+        async onViewerPlay() {
+            super.onViewerPlay();
+            if (this.stateBeforeViewerPause && this.stateBeforeViewerPause.playing) {
+                await this.play(false);
+            }
+            delete (this.stateBeforeViewerPause);
+        }
+        _updateTime(time) {
+            this.updateTime(time);
+        }
+        /**
+         *
+         * @param time In milliseconds
+         */
+        updateTime(time) {
+            if (typeof time === "number") {
+                const newTime = Math.round(time / 100) / 10;
+                const timeChanged = this.state.timeline.currentTime !== newTime;
+                this.changeRuntimeCurrentTime(newTime);
+                if (timeChanged) {
+                    this.onTimeChange();
+                }
+            }
+        }
+        onTimeChange() {
+            const currentTime = this.currentTime();
+            this.$element.emitKappaViewerEvent("ElementTime", currentTime);
+        }
+        currentTime() {
+            return this.state?.timeline?.currentTime || 0;
+        }
+        async onStateChange(state, paths, forced) {
+            await super.onStateChange(state, paths, forced);
+            this._startedPlaying = state.timeline.startedPlaying;
+            this._playing = state.timeline.playing;
+            this._muted = state.timeline.muted;
+        }
+        async play(emitEvent = true) {
+            const currentTime = this.currentTime();
+            await this.changeRuntimeState((state) => {
+                if (!state || !state.timeline)
+                    return;
+                state.timeline.currentTime = currentTime;
+                state.timeline.startedPlaying = true;
+                state.timeline.playing = true;
+            });
+            this.timer.start(currentTime * 1000);
+            if (emitEvent) {
+                await this.$element.emitKappaViewerEvent("ElementPlay", { time: currentTime });
+            }
+        }
+        async pause(emitEvent = true) {
+            this.timer.stop();
+            const currentTime = this.currentTime();
+            await this.changeRuntimeState((state) => {
+                state.timeline.currentTime = currentTime;
+                state.timeline.playing = false;
+            });
+            if (emitEvent) {
+                await this.$element.emitKappaViewerEvent("ElementPause", { time: currentTime });
+            }
+        }
+        async seek(time) {
+            throw new Error("Not Implemented");
+        }
+        async seekTo(time) {
+            throw new Error("not Implemented");
+        }
+        async seekToAndPlay(time) {
+            await this.seekTo(time);
+            await this.play();
+        }
+        async seekToAndPause(time) {
+            await this.seekTo(time);
+            await this.pause();
+            this.updateTime();
+        }
+        async seekAndPlay(time) {
+            await this.seek(time);
+            await this.play();
+        }
+        async seekAndPause(time) {
+            await this.seek(time);
+            await this.pause();
+        }
+    }
+
+    var html = "<video class=\"elem-${$element.elementId}-video\" ref=\"$renderer.videoElem\" crossorigin=\"anonymous\"\n    muted.bind=\"$renderer.isMuted\" playsinline preload=\"metadata\">\n</video>";
+
+    class KappaElementVideo extends KappaTimelineElementRenderer {
+        constructor(referenceService) {
+            var _a, _b;
+            super(referenceService);
+            this.isMuted = true;
+            this.isPortrait = false;
+            this.viewerMuted = true;
+            this.playerIsReady = false;
+            this.currentSrc = "";
+            this.shakaInfo = {
+                supports: {
+                    manifest: {
+                        mpd: false,
+                        m3u8: false
+                    }
+                },
+                shakaSupported: ((_b = (_a = window === null || window === void 0 ? void 0 : window.shaka) === null || _a === void 0 ? void 0 : _a.Player) === null || _b === void 0 ? void 0 : _b.isBrowserSupported) ? window.shaka.Player.isBrowserSupported() : false
+            };
+            this._ready = false;
+            this.onPlay = this.onPlay.bind(this);
+            this.onPause = this.onPause.bind(this);
+            this.onReady = this.onReady.bind(this);
+            this.onVideoResize = this.onVideoResize.bind(this);
+            this.initPlayer = debounce(this.initPlayer.bind(this), 50, { leading: false, trailing: true });
+            this.timerGet = this.timerGet.bind(this);
+            this.timerSet = this.timerSet.bind(this);
+            this.timer.setupExternalTimer({
+                setTime: this.timerSet,
+                getTime: this.timerGet
+            });
+        }
+        timerGet() {
+            if (!this.videoElem) {
+                return 0;
+            }
+            const playerTime = Math.round(this.videoElem.currentTime * 10) * 100;
+            return playerTime;
+        }
+        timerSet(timer) {
+            return;
+        }
+        onProcessStyle() {
+            const _super = Object.create(null, {
+                onProcessStyle: { get: () => super.onProcessStyle }
+            });
+            return __awaiter$1(this, void 0, void 0, function* () {
+                yield _super.onProcessStyle.call(this);
+                this.$element.styleSheet.replaceRule("video", {
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover"
+                });
+            });
+        }
+        get state() {
+            return super.state;
+        }
+        getUrl(formats, kind) {
+            var _a, _b, _c, _d, _e;
+            if (formats && formats.length > 0) {
+                for (const format of formats) {
+                    if (format.format === kind && kind === "DASH" && this.shakaInfo.shakaSupported && this.shakaInfo.supports.manifest.mpd) {
+                        return (_a = format === null || format === void 0 ? void 0 : format.resolutions[0]) === null || _a === void 0 ? void 0 : _a.url;
+                    }
+                    else if (format.format === kind && kind === "MP4") {
+                        return (_c = format === null || format === void 0 ? void 0 : format.resolutions[((_b = format === null || format === void 0 ? void 0 : format.resolutions) === null || _b === void 0 ? void 0 : _b.length) - 1]) === null || _c === void 0 ? void 0 : _c.url;
+                    }
+                    else if (format.format === kind && kind === "HLS" && this.shakaInfo.shakaSupported && this.shakaInfo.supports.manifest.m3u8) {
+                        return (_e = format === null || format === void 0 ? void 0 : format.resolutions[((_d = format === null || format === void 0 ? void 0 : format.resolutions) === null || _d === void 0 ? void 0 : _d.length) - 1]) === null || _e === void 0 ? void 0 : _e.url;
+                    }
+                }
+            }
+            return null;
+        }
+        onUpdateDefaultState(state) {
+            return __awaiter$1(this, void 0, void 0, function* () {
+                const mediaId = this.$element.getLayoutAttribute("mediaSrc", true);
+                const muted = this.$element.getLayoutAttribute("muted", true);
+                if (!mediaId)
+                    return state;
+                let mediaSrc = null;
+                let fallbackMediaSrc = null;
+                const content = this.$element.referenceService.contentService.getContentById(mediaId);
+                if (content) {
+                    mediaSrc = content.url;
+                    fallbackMediaSrc = content.url;
+                }
+                state.media.mediaId = mediaId;
+                state.media.mediaSrc = mediaSrc;
+                state.media.fallbackMediaSrc = fallbackMediaSrc;
+                state.timeline.muted = muted;
+                return state;
+            });
+        }
+        updateMediaUrls() {
+            var _a;
+            return __awaiter$1(this, void 0, void 0, function* () {
+                if (!this.isAttached)
+                    return;
+                const mediaId = this.state.media.mediaId;
+                if (!mediaId)
+                    return;
+                let content = this.$element.referenceService.contentService.getContentById(mediaId);
+                if (!content)
+                    return;
+                let mediaSrc = content.url + "#t=0.001";
+                let fallbackMediaSrc = content.url + "#t=0.001";
+                const processedFormats = ((_a = content === null || content === void 0 ? void 0 : content.processed) === null || _a === void 0 ? void 0 : _a.formats) || [];
+                const hlsURL = this.getUrl(processedFormats, "HLS");
+                const dashURL = this.getUrl(processedFormats, "DASH");
+                let processedMp4Url = this.getUrl(processedFormats, "MP4");
+                if (processedMp4Url)
+                    processedMp4Url += "#t=0.001";
+                mediaSrc = hlsURL || dashURL || processedMp4Url || fallbackMediaSrc;
+                yield this.changeRuntimeState((state) => {
+                    state.media.mediaSrc = mediaSrc;
+                    state.media.fallbackMediaSrc = fallbackMediaSrc;
+                    state.data.hlsURL = hlsURL;
+                    state.data.dashURL = dashURL;
+                    state.data.processedMp4Url = processedMp4Url;
+                });
+            });
+        }
+        onStateChange(state, paths, forced) {
+            const _super = Object.create(null, {
+                onStateChange: { get: () => super.onStateChange }
+            });
+            return __awaiter$1(this, void 0, void 0, function* () {
+                yield _super.onStateChange.call(this, state, paths, forced);
+                let mediaIdUpdated = forced || false;
+                let mediaUrlsUpdated = forced || false;
+                let mediaDemandedUpdated = forced || false;
+                let muteStatusUpdated = forced || false;
+                for (const path of paths) {
+                    if (this.$element.isSubPath(["media", "mediaId"], path)) {
+                        mediaIdUpdated = true;
+                    }
+                    if (this.$element.isSubPath(["media", "mediaSrc"], path) || this.$element.isSubPath(["media", "fallbackMediaSrc"], path)) {
+                        mediaUrlsUpdated = true;
+                    }
+                    if (this.$element.isSubPath(["media", "mediaDemanded"], path)) {
+                        mediaDemandedUpdated = true;
+                    }
+                    if (this.$element.isSubPath(["timeline", "muted"], path)) {
+                        muteStatusUpdated = true;
+                    }
+                }
+                if (mediaIdUpdated) {
+                    this.updateMediaUrls();
+                }
+                if (mediaDemandedUpdated) {
+                    this.setupDemandedMedia();
+                }
+                if (mediaUrlsUpdated) {
+                    this.setupDemandedMedia();
+                }
+                if (muteStatusUpdated) {
+                    this.updateMuteStatus();
+                }
+            });
+        }
+        isVisibleToUserChanged(newVal, oldVal) {
+            return __awaiter$1(this, void 0, void 0, function* () {
+                if (newVal === true && this.state.media.loadBehaviour === "ON_DEMAND" && !this.state.media.mediaDemanded) {
+                    yield this.mediaDemanded();
+                }
+            });
+        }
+        setupMediaLoadBehaviours() {
+            return __awaiter$1(this, void 0, void 0, function* () {
+                if (this.state.media.loadBehaviour === "PRELOAD") {
+                    yield this.mediaDemanded();
+                }
+                else if (this.state.media.loadBehaviour === "ON_DEMAND") {
+                    if (this.$element.isVisibleToUser) {
+                        yield this.mediaDemanded();
+                    }
+                    else {
+                        this.visibilityObserver = this.$element.observeProperty("isVisibleToUser", (newVal, oldVal) => {
+                            this.isVisibleToUserChanged(newVal, oldVal);
+                        });
+                    }
+                }
+            });
+        }
+        mediaDemanded() {
+            return __awaiter$1(this, void 0, void 0, function* () {
+                this.clearMediaLoadBehaviours();
+                yield this.changeRuntimeState((state) => {
+                    state.media.mediaDemanded = true;
+                });
+            });
+        }
+        clearMediaLoadBehaviours() {
+            var _a;
+            (_a = this.visibilityObserver) === null || _a === void 0 ? void 0 : _a.dispose();
+        }
+        viewAttached() {
+            const _super = Object.create(null, {
+                viewAttached: { get: () => super.viewAttached }
+            });
+            return __awaiter$1(this, void 0, void 0, function* () {
+                try {
+                    this.shakaInfo.supports = yield window.shaka.Player.probeSupport(false);
+                }
+                catch (_a) { }
+                yield _super.viewAttached.call(this);
+                yield this.updateMediaUrls();
+                this.viewerMuted = this.$element.referenceService.kappaService ? this.$element.referenceService.kappaService.initialMuted : true;
+                this.updateMuteStatus();
+                this.setupVideoEvents();
+                yield this.setupDemandedMedia();
+                this.resizeObserver = new ResizeObserver(this.onVideoResize);
+                this.resizeObserver.observe(this.$element.htmlRef);
+            });
+        }
+        viewDetached() {
+            const _super = Object.create(null, {
+                viewDetached: { get: () => super.viewDetached }
+            });
+            return __awaiter$1(this, void 0, void 0, function* () {
+                this.resizeObserver.unobserve(this.$element.htmlRef);
+                this.resizeObserver.disconnect();
+                yield this.destroyPlayer();
+                this.clearMediaLoadBehaviours();
+                this.removeVideoEvents();
+                _super.viewDetached.call(this);
+            });
+        }
+        setupVideoEvents() {
+            this.videoElem.addEventListener("play", this.onPlay);
+            this.videoElem.addEventListener("pause", this.onPause);
+            this.videoElem.addEventListener("ready", this.onReady);
+        }
+        removeVideoEvents() {
+            if (this.videoElem) {
+                this.videoElem.removeEventListener("play", this.onPlay);
+                this.videoElem.removeEventListener("pause", this.onPause);
+                this.videoElem.removeEventListener("ready", this.onReady);
+            }
+        }
+        getRestrictions(width, height) {
+            const restrictions = { maxWidth: width, minWidth: width, maxHeight: height, minHeight: height };
+            const VALID_RESOLUTIONS = [360, 480, 720, 1080];
+            const VALID_RESOLUTION_PAIR = [480, 640, 1280, 1920];
+            let targets = [];
+            if (this.isPortrait) {
+                targets.push(...VALID_RESOLUTIONS.filter(x => width <= x));
+            }
+            else {
+                targets.push(...VALID_RESOLUTIONS.filter(x => height <= x));
+            }
+            const resolution = Math.max(Math.min(...targets), 480);
+            if (this.isPortrait) {
+                restrictions.maxHeight = VALID_RESOLUTION_PAIR[VALID_RESOLUTIONS.indexOf(resolution)];
+                restrictions.maxWidth = resolution;
+            }
+            else {
+                restrictions.maxHeight = resolution;
+                restrictions.maxWidth = VALID_RESOLUTION_PAIR[VALID_RESOLUTIONS.indexOf(resolution)];
+            }
+            return restrictions;
+        }
+        onVideoResize() {
+            const bcr = this.videoElem.getBoundingClientRect();
+            const width = parseFloat(bcr.width);
+            const height = parseFloat(bcr.height);
+            if (!this.shakaInstance)
+                return;
+            this.shakaInstance.configure({
+                abr: {
+                    restrictions: this.getRestrictions(width, height)
+                }
+            });
+        }
+        waitForPause() {
+            return __awaiter$1(this, void 0, void 0, function* () {
+                if (this.videoElem.paused)
+                    return true;
+                yield new Promise((resolve) => {
+                    setTimeout(() => __awaiter$1(this, void 0, void 0, function* () {
+                        yield resolve(yield this.waitForPause);
+                    }), 10);
+                });
+            });
+        }
+        onViewerResize() {
+            const _super = Object.create(null, {
+                onViewerResize: { get: () => super.onViewerResize }
+            });
+            return __awaiter$1(this, void 0, void 0, function* () {
+                yield _super.onViewerResize.call(this);
+                yield this.setupDemandedMedia();
+            });
+        }
+        destroyPlayer() {
+            var _a, _b;
+            return __awaiter$1(this, void 0, void 0, function* () {
+                yield ((_a = this.shakaInstance) === null || _a === void 0 ? void 0 : _a.detach());
+                yield ((_b = this.shakaInstance) === null || _b === void 0 ? void 0 : _b.destroy());
+                this.shakaInstance = null;
+                this.playerIsReady = false;
+            });
+        }
+        initPlayer() {
+            var _a, _b;
+            return __awaiter$1(this, void 0, void 0, function* () {
+                const src = this.state.media.mediaSrc;
+                if (this.currentSrc === src && this.playerIsReady) {
+                    return;
+                }
+                yield this.pause();
+                const currentTime = this.currentTime();
+                const isPlaying = this.playing;
+                if (!src) {
+                    yield this.destroyPlayer();
+                    return;
+                }
+                else if (src.indexOf(".m3u8") === -1 && src.indexOf(".mpd") === -1) {
+                    yield ((_a = this.shakaInstance) === null || _a === void 0 ? void 0 : _a.detach());
+                    yield ((_b = this.shakaInstance) === null || _b === void 0 ? void 0 : _b.destroy());
+                    this.shakaInstance = null;
+                    this.videoElem.src = src;
+                }
+                else {
+                    if (!this.shakaInstance) {
+                        this.shakaInstance = new window.shaka.Player(this.videoElem);
+                    }
+                    this.shakaInstance.configure({
+                        streaming: {
+                            bufferingGoal: 1
+                        }
+                    });
+                    try {
+                        yield this.shakaInstance.load(src);
+                    }
+                    catch (e) { }
+                    const portrait = this.videoElem.videoHeight > this.videoElem.videoWidth;
+                    this.isPortrait = portrait;
+                }
+                this.playerIsReady = true;
+                this.currentSrc = src;
+                this.onVideoResize();
+                if (isPlaying) {
+                    yield this.seekAndPlay(currentTime);
+                }
+                else {
+                    yield this.seek(currentTime);
+                }
+            });
+        }
+        setupDemandedMedia() {
+            return __awaiter$1(this, void 0, void 0, function* () {
+                if (!this.state.media.mediaDemanded)
+                    return;
+                yield this.initPlayer();
+            });
+        }
+        ensureVideoLoaded() {
+            return __awaiter$1(this, void 0, void 0, function* () {
+                yield this.mediaDemanded();
+                while (true) {
+                    yield sleep(10);
+                    if (this.playerIsReady) {
+                        return;
+                    }
+                }
+            });
+        }
+        viewAttaching() {
+            const _super = Object.create(null, {
+                viewAttaching: { get: () => super.viewAttaching }
+            });
+            return __awaiter$1(this, void 0, void 0, function* () {
+                yield _super.viewAttaching.call(this);
+                yield this.setupMediaLoadBehaviours();
+            });
+        }
+        get seekable() {
+            return true;
+        }
+        updateMuteStatus() {
+            this.isMuted = this.viewerMuted || this.state.timeline.muted;
+        }
+        onViewerMute() {
+            const _super = Object.create(null, {
+                onViewerMute: { get: () => super.onViewerMute }
+            });
+            return __awaiter$1(this, void 0, void 0, function* () {
+                yield _super.onViewerMute.call(this);
+                this.viewerMuted = true;
+                this.updateMuteStatus();
+            });
+        }
+        onViewerUnmute() {
+            const _super = Object.create(null, {
+                onViewerUnmute: { get: () => super.onViewerUnmute }
+            });
+            return __awaiter$1(this, void 0, void 0, function* () {
+                yield _super.onViewerUnmute.call(this);
+                this.viewerMuted = false;
+                this.updateMuteStatus();
+            });
+        }
+        awaitPlayerReady() {
+            return __awaiter$1(this, void 0, void 0, function* () {
+                if (this.playerIsReady)
+                    return true;
+                return yield new Promise((resolve) => {
+                    setTimeout(() => __awaiter$1(this, void 0, void 0, function* () {
+                        resolve(yield this.awaitPlayerReady());
+                    }), 10);
+                });
+            });
+        }
+        play(emitEvent = true) {
+            const _super = Object.create(null, {
+                play: { get: () => super.play }
+            });
+            return __awaiter$1(this, void 0, void 0, function* () {
+                yield this.ensureVideoLoaded();
+                yield this.awaitPlayerReady();
+                yield this.videoElem.play();
+                yield _super.play.call(this, emitEvent);
+            });
+        }
+        pause(emitEvent = true) {
+            const _super = Object.create(null, {
+                pause: { get: () => super.pause }
+            });
+            return __awaiter$1(this, void 0, void 0, function* () {
+                yield this.videoElem.pause();
+                yield _super.pause.call(this, emitEvent);
+            });
+        }
+        seek(time) {
+            return __awaiter$1(this, void 0, void 0, function* () {
+                yield this.ensureVideoLoaded();
+                this.videoElem.currentTime = this.videoElem.currentTime + time;
+            });
+        }
+        seekTo(time) {
+            return __awaiter$1(this, void 0, void 0, function* () {
+                yield this.ensureVideoLoaded();
+                const seekDiff = time - this.videoElem.currentTime;
+                yield this.seek(seekDiff);
+            });
+        }
+        muteVideo() {
+            return __awaiter$1(this, void 0, void 0, function* () {
+                yield this.changeRuntimeState((state) => {
+                    state.timeline.muted = true;
+                });
+            });
+        }
+        unMuteVideo() {
+            return __awaiter$1(this, void 0, void 0, function* () {
+                yield this.changeRuntimeState((state) => {
+                    state.timeline.muted = false;
+                });
+            });
+        }
+        resetVideo() {
+            return __awaiter$1(this, void 0, void 0, function* () {
+                yield this.updateMediaUrls();
+                yield this.setupMediaLoadBehaviours();
+            });
+        }
+        onResetElement() {
+            const _super = Object.create(null, {
+                onResetElement: { get: () => super.onResetElement }
+            });
+            return __awaiter$1(this, void 0, void 0, function* () {
+                yield _super.onResetElement.call(this);
+                this.videoElem.currentTime = this.state.timeline.currentTime;
+                this.resetVideo();
+            });
+        }
+        setVolume(volume) {
+            return __awaiter$1(this, void 0, void 0, function* () {
+                this.videoElem.volume = Math.round(volume / 10) / 10;
+            });
+        }
+        onPlay(e) {
+            this._playing = true;
+            this.$element.emitKappaViewerEvent("ElementPlay", { time: this.currentTime() });
+        }
+        onPause(e) {
+            this._playing = false;
+            this.$element.emitKappaViewerEvent("ElementPause", { time: this.currentTime() });
+        }
+        onReady(e) {
+            this._ready = true;
+        }
+        isVideoMuted() {
+            return this.isMuted || this.videoElem.volume === 0;
+        }
+    }
+    KappaElementVideo.$view = html;
+
+    class KappaPluginElementVideo extends KappaPluginTimelineElement {
+        get name() {
+            return "Video Element";
+        }
+        getRenderer() {
+            return KappaElementVideo;
+        }
+    }
+    const attributes = [
+        { name: "mediaSrc", label: "Media", schema: { type: "KAPPA_VIDEO" }, target: "element", isLayoutAttribute: true },
+        { name: "muted", label: "Muted", schema: { type: "BOOLEAN" }, target: "element", isLayoutAttribute: true }
+    ];
+    KappaPluginElementVideo.attributes = [...KappaPluginTimelineElement.attributes, ...attributes];
+    KappaPluginElementVideo.methods = [
+        ...KappaPluginTimelineElement.methods,
+        {
+            name: "seek",
+            label: "Seek",
+            params: [{ name: 'seconds', label: 'Seconds', schema: { type: 'NUMBER', unit: "SECOND" } }],
+            expressionTemplate: ["Seek", { target: "element", type: "target" }, "by", { type: "hole", targetParamName: "seconds" }, "seconds"]
+        },
+        {
+            name: "seekTo",
+            label: "Seek To",
+            params: [{ name: 'time', label: 'Time', schema: { type: 'NUMBER', unit: "SECOND" } }],
+            expressionTemplate: ["Seek", { target: "element", type: "target" }, "to", { type: "hole", targetParamName: "time" }, "seconds"]
+        },
+        {
+            name: "setVolume",
+            label: "Set Video Volume",
+            params: [{ name: 'volume', label: 'Volume', schema: { type: 'NUMBER', unit: "PERCENT" } }],
+            expressionTemplate: ["Set", "Volume", "of", { target: "element", type: "target" }, "to", { type: "hole", targetParamName: "volume" }]
+        },
+        {
+            name: "currentTime",
+            label: "Current Time",
+            params: [],
+            expressionTemplate: ["Current Time", "of", { target: "element", type: "target" }],
+            schema: { type: "NUMBER", unit: "SECOND" }
+        },
+        {
+            name: "isVideoMuted",
+            label: "Is Video Muted",
+            params: [],
+            expressionTemplate: ["Is", { target: "element", type: "target" }, "Muted"],
+            schema: { type: "BOOLEAN" }
+        },
+        {
+            name: "muteVideo",
+            label: "Mute",
+            params: [],
+            expressionTemplate: ["Mute", { target: "element", type: "target" }]
+        },
+        {
+            name: "unMuteVideo",
+            label: "Unmute",
+            params: [],
+            expressionTemplate: ["Unmute", { target: "element", type: "target" }]
+        }
+    ];
+    KappaPluginElementVideo.events = [...KappaPluginTimelineElement.events];
+
+    registerElementPlugin("KappaPluginElementVideo", KappaPluginElementVideo);
+
+})();
+//# sourceMappingURL=plugin-element-video.viewer.js.map

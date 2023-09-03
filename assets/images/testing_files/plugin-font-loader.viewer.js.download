@@ -1,0 +1,1227 @@
+(function () {
+    'use strict';
+
+    /******************************************************************************
+    Copyright (c) Microsoft Corporation.
+
+    Permission to use, copy, modify, and/or distribute this software for any
+    purpose with or without fee is hereby granted.
+
+    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+    REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+    AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+    INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+    LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+    OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+    PERFORMANCE OF THIS SOFTWARE.
+    ***************************************************************************** */
+
+    function __awaiter$1(thisArg, _arguments, P, generator) {
+        function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+        return new (P || (P = Promise))(function (resolve, reject) {
+            function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+            function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+            function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+            step((generator = generator.apply(thisArg, _arguments || [])).next());
+        });
+    }
+
+    var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+
+    var objectPath = {exports: {}};
+
+    (function (module) {
+    	(function (root, factory) {
+
+    	  /*istanbul ignore next:cant test*/
+    	  {
+    	    module.exports = factory();
+    	  }
+    	})(commonjsGlobal, function () {
+
+    	  var toStr = Object.prototype.toString;
+
+    	  function hasOwnProperty (obj, prop) {
+    	    if (obj == null) {
+    	      return false
+    	    }
+    	    //to handle objects with null prototypes (too edge case?)
+    	    return Object.prototype.hasOwnProperty.call(obj, prop)
+    	  }
+
+    	  function isEmpty (value) {
+    	    if (!value) {
+    	      return true
+    	    }
+    	    if (isArray(value) && value.length === 0) {
+    	      return true
+    	    } else if (typeof value !== 'string') {
+    	      for (var i in value) {
+    	        if (hasOwnProperty(value, i)) {
+    	          return false
+    	        }
+    	      }
+    	      return true
+    	    }
+    	    return false
+    	  }
+
+    	  function toString (type) {
+    	    return toStr.call(type)
+    	  }
+
+    	  function isObject (obj) {
+    	    return typeof obj === 'object' && toString(obj) === '[object Object]'
+    	  }
+
+    	  var isArray = Array.isArray || function (obj) {
+    	    /*istanbul ignore next:cant test*/
+    	    return toStr.call(obj) === '[object Array]'
+    	  };
+
+    	  function isBoolean (obj) {
+    	    return typeof obj === 'boolean' || toString(obj) === '[object Boolean]'
+    	  }
+
+    	  function getKey (key) {
+    	    var intKey = parseInt(key);
+    	    if (intKey.toString() === key) {
+    	      return intKey
+    	    }
+    	    return key
+    	  }
+
+    	  function factory (options) {
+    	    options = options || {};
+
+    	    var objectPath = function (obj) {
+    	      return Object.keys(objectPath).reduce(function (proxy, prop) {
+    	        if (prop === 'create') {
+    	          return proxy
+    	        }
+
+    	        /*istanbul ignore else*/
+    	        if (typeof objectPath[prop] === 'function') {
+    	          proxy[prop] = objectPath[prop].bind(objectPath, obj);
+    	        }
+
+    	        return proxy
+    	      }, {})
+    	    };
+
+    	    var hasShallowProperty;
+    	    if (options.includeInheritedProps) {
+    	      hasShallowProperty = function () {
+    	        return true
+    	      };
+    	    } else {
+    	      hasShallowProperty = function (obj, prop) {
+    	        return (typeof prop === 'number' && Array.isArray(obj)) || hasOwnProperty(obj, prop)
+    	      };
+    	    }
+
+    	    function getShallowProperty (obj, prop) {
+    	      if (hasShallowProperty(obj, prop)) {
+    	        return obj[prop]
+    	      }
+    	    }
+
+    	    var getShallowPropertySafely;
+    	    if (options.includeInheritedProps) {
+    	      getShallowPropertySafely = function (obj, currentPath) {
+    	        if (typeof currentPath !== 'string' && typeof currentPath !== 'number') {
+    	          currentPath = String(currentPath);
+    	        }
+    	        var currentValue = getShallowProperty(obj, currentPath);
+    	        if (currentPath === '__proto__' || currentPath === 'prototype' ||
+    	          (currentPath === 'constructor' && typeof currentValue === 'function')) {
+    	          throw new Error('For security reasons, object\'s magic properties cannot be set')
+    	        }
+    	        return currentValue
+    	      };
+    	    } else {
+    	      getShallowPropertySafely = function (obj, currentPath) {
+    	        return getShallowProperty(obj, currentPath)
+    	      };
+    	    }
+
+    	    function set (obj, path, value, doNotReplace) {
+    	      if (typeof path === 'number') {
+    	        path = [path];
+    	      }
+    	      if (!path || path.length === 0) {
+    	        return obj
+    	      }
+    	      if (typeof path === 'string') {
+    	        return set(obj, path.split('.').map(getKey), value, doNotReplace)
+    	      }
+    	      var currentPath = path[0];
+    	      var currentValue = getShallowPropertySafely(obj, currentPath);
+    	      if (path.length === 1) {
+    	        if (currentValue === void 0 || !doNotReplace) {
+    	          obj[currentPath] = value;
+    	        }
+    	        return currentValue
+    	      }
+
+    	      if (currentValue === void 0) {
+    	        //check if we assume an array
+    	        if (typeof path[1] === 'number') {
+    	          obj[currentPath] = [];
+    	        } else {
+    	          obj[currentPath] = {};
+    	        }
+    	      }
+
+    	      return set(obj[currentPath], path.slice(1), value, doNotReplace)
+    	    }
+
+    	    objectPath.has = function (obj, path) {
+    	      if (typeof path === 'number') {
+    	        path = [path];
+    	      } else if (typeof path === 'string') {
+    	        path = path.split('.');
+    	      }
+
+    	      if (!path || path.length === 0) {
+    	        return !!obj
+    	      }
+
+    	      for (var i = 0; i < path.length; i++) {
+    	        var j = getKey(path[i]);
+
+    	        if ((typeof j === 'number' && isArray(obj) && j < obj.length) ||
+    	          (options.includeInheritedProps ? (j in Object(obj)) : hasOwnProperty(obj, j))) {
+    	          obj = obj[j];
+    	        } else {
+    	          return false
+    	        }
+    	      }
+
+    	      return true
+    	    };
+
+    	    objectPath.ensureExists = function (obj, path, value) {
+    	      return set(obj, path, value, true)
+    	    };
+
+    	    objectPath.set = function (obj, path, value, doNotReplace) {
+    	      return set(obj, path, value, doNotReplace)
+    	    };
+
+    	    objectPath.insert = function (obj, path, value, at) {
+    	      var arr = objectPath.get(obj, path);
+    	      at = ~~at;
+    	      if (!isArray(arr)) {
+    	        arr = [];
+    	        objectPath.set(obj, path, arr);
+    	      }
+    	      arr.splice(at, 0, value);
+    	    };
+
+    	    objectPath.empty = function (obj, path) {
+    	      if (isEmpty(path)) {
+    	        return void 0
+    	      }
+    	      if (obj == null) {
+    	        return void 0
+    	      }
+
+    	      var value, i;
+    	      if (!(value = objectPath.get(obj, path))) {
+    	        return void 0
+    	      }
+
+    	      if (typeof value === 'string') {
+    	        return objectPath.set(obj, path, '')
+    	      } else if (isBoolean(value)) {
+    	        return objectPath.set(obj, path, false)
+    	      } else if (typeof value === 'number') {
+    	        return objectPath.set(obj, path, 0)
+    	      } else if (isArray(value)) {
+    	        value.length = 0;
+    	      } else if (isObject(value)) {
+    	        for (i in value) {
+    	          if (hasShallowProperty(value, i)) {
+    	            delete value[i];
+    	          }
+    	        }
+    	      } else {
+    	        return objectPath.set(obj, path, null)
+    	      }
+    	    };
+
+    	    objectPath.push = function (obj, path /*, values */) {
+    	      var arr = objectPath.get(obj, path);
+    	      if (!isArray(arr)) {
+    	        arr = [];
+    	        objectPath.set(obj, path, arr);
+    	      }
+
+    	      arr.push.apply(arr, Array.prototype.slice.call(arguments, 2));
+    	    };
+
+    	    objectPath.coalesce = function (obj, paths, defaultValue) {
+    	      var value;
+
+    	      for (var i = 0, len = paths.length; i < len; i++) {
+    	        if ((value = objectPath.get(obj, paths[i])) !== void 0) {
+    	          return value
+    	        }
+    	      }
+
+    	      return defaultValue
+    	    };
+
+    	    objectPath.get = function (obj, path, defaultValue) {
+    	      if (typeof path === 'number') {
+    	        path = [path];
+    	      }
+    	      if (!path || path.length === 0) {
+    	        return obj
+    	      }
+    	      if (obj == null) {
+    	        return defaultValue
+    	      }
+    	      if (typeof path === 'string') {
+    	        return objectPath.get(obj, path.split('.'), defaultValue)
+    	      }
+
+    	      var currentPath = getKey(path[0]);
+    	      var nextObj = getShallowPropertySafely(obj, currentPath);
+    	      if (nextObj === void 0) {
+    	        return defaultValue
+    	      }
+
+    	      if (path.length === 1) {
+    	        return nextObj
+    	      }
+
+    	      return objectPath.get(obj[currentPath], path.slice(1), defaultValue)
+    	    };
+
+    	    objectPath.del = function del (obj, path) {
+    	      if (typeof path === 'number') {
+    	        path = [path];
+    	      }
+
+    	      if (obj == null) {
+    	        return obj
+    	      }
+
+    	      if (isEmpty(path)) {
+    	        return obj
+    	      }
+    	      if (typeof path === 'string') {
+    	        return objectPath.del(obj, path.split('.'))
+    	      }
+
+    	      var currentPath = getKey(path[0]);
+    	      getShallowPropertySafely(obj, currentPath);
+    	      if (!hasShallowProperty(obj, currentPath)) {
+    	        return obj
+    	      }
+
+    	      if (path.length === 1) {
+    	        if (isArray(obj)) {
+    	          obj.splice(currentPath, 1);
+    	        } else {
+    	          delete obj[currentPath];
+    	        }
+    	      } else {
+    	        return objectPath.del(obj[currentPath], path.slice(1))
+    	      }
+
+    	      return obj
+    	    };
+
+    	    return objectPath
+    	  }
+
+    	  var mod = factory();
+    	  mod.create = factory;
+    	  mod.withInheritedProps = factory({includeInheritedProps: true});
+    	  return mod
+    	}); 
+    } (objectPath));
+
+    var objectPathExports = objectPath.exports;
+
+    /******************************************************************************
+    Copyright (c) Microsoft Corporation.
+
+    Permission to use, copy, modify, and/or distribute this software for any
+    purpose with or without fee is hereby granted.
+
+    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+    REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+    AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+    INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+    LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+    OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+    PERFORMANCE OF THIS SOFTWARE.
+    ***************************************************************************** */
+
+    function __awaiter(thisArg, _arguments, P, generator) {
+        function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+        return new (P || (P = Promise))(function (resolve, reject) {
+            function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+            function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+            function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+            step((generator = generator.apply(thisArg, _arguments || [])).next());
+        });
+    }
+
+    function registerIntegrationPlugin(name, plugin) {
+        objectPathExports.set(window, `kp.integration.${name}`, plugin);
+    }
+    class KappaPluginBase {
+        constructor() {
+            Object.defineProperty(this, "_isReady", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+            Object.defineProperty(this, "_pluginConfig", {
+                enumerable: true,
+                configurable: true,
+                writable: true,
+                value: void 0
+            });
+        }
+        get pluginConfig() {
+            return this._pluginConfig;
+        }
+        get isReady() {
+            return this._isReady;
+        }
+        get name() {
+            return "";
+        }
+        get configurable() {
+            return false;
+        }
+        setup(config) {
+            return __awaiter(this, void 0, void 0, function* () {
+                throw new Error('Method not implemented.');
+            });
+        }
+        getMethod(name) {
+            if (this[name] && typeof this[name] === "function") {
+                return this[name].bind(this);
+            }
+            return null;
+        }
+    }
+    Object.defineProperty(KappaPluginBase, "attributes", {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: []
+    });
+    Object.defineProperty(KappaPluginBase, "methods", {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: []
+    });
+    Object.defineProperty(KappaPluginBase, "events", {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: []
+    });
+
+    /** Detect free variable `global` from Node.js. */
+    var freeGlobal = typeof global == 'object' && global && global.Object === Object && global;
+
+    var freeGlobal$1 = freeGlobal;
+
+    /** Detect free variable `self`. */
+    var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
+
+    /** Used as a reference to the global object. */
+    var root = freeGlobal$1 || freeSelf || Function('return this')();
+
+    var root$1 = root;
+
+    /** Built-in value references. */
+    var Symbol = root$1.Symbol;
+
+    var Symbol$1 = Symbol;
+
+    /** Used for built-in method references. */
+    var objectProto$1 = Object.prototype;
+
+    /** Used to check objects for own properties. */
+    var hasOwnProperty = objectProto$1.hasOwnProperty;
+
+    /**
+     * Used to resolve the
+     * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+     * of values.
+     */
+    var nativeObjectToString$1 = objectProto$1.toString;
+
+    /** Built-in value references. */
+    var symToStringTag$1 = Symbol$1 ? Symbol$1.toStringTag : undefined;
+
+    /**
+     * A specialized version of `baseGetTag` which ignores `Symbol.toStringTag` values.
+     *
+     * @private
+     * @param {*} value The value to query.
+     * @returns {string} Returns the raw `toStringTag`.
+     */
+    function getRawTag(value) {
+      var isOwn = hasOwnProperty.call(value, symToStringTag$1),
+          tag = value[symToStringTag$1];
+
+      try {
+        value[symToStringTag$1] = undefined;
+        var unmasked = true;
+      } catch (e) {}
+
+      var result = nativeObjectToString$1.call(value);
+      if (unmasked) {
+        if (isOwn) {
+          value[symToStringTag$1] = tag;
+        } else {
+          delete value[symToStringTag$1];
+        }
+      }
+      return result;
+    }
+
+    /** Used for built-in method references. */
+    var objectProto = Object.prototype;
+
+    /**
+     * Used to resolve the
+     * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+     * of values.
+     */
+    var nativeObjectToString = objectProto.toString;
+
+    /**
+     * Converts `value` to a string using `Object.prototype.toString`.
+     *
+     * @private
+     * @param {*} value The value to convert.
+     * @returns {string} Returns the converted string.
+     */
+    function objectToString(value) {
+      return nativeObjectToString.call(value);
+    }
+
+    /** `Object#toString` result references. */
+    var nullTag = '[object Null]',
+        undefinedTag = '[object Undefined]';
+
+    /** Built-in value references. */
+    var symToStringTag = Symbol$1 ? Symbol$1.toStringTag : undefined;
+
+    /**
+     * The base implementation of `getTag` without fallbacks for buggy environments.
+     *
+     * @private
+     * @param {*} value The value to query.
+     * @returns {string} Returns the `toStringTag`.
+     */
+    function baseGetTag(value) {
+      if (value == null) {
+        return value === undefined ? undefinedTag : nullTag;
+      }
+      return (symToStringTag && symToStringTag in Object(value))
+        ? getRawTag(value)
+        : objectToString(value);
+    }
+
+    /**
+     * Checks if `value` is object-like. A value is object-like if it's not `null`
+     * and has a `typeof` result of "object".
+     *
+     * @static
+     * @memberOf _
+     * @since 4.0.0
+     * @category Lang
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+     * @example
+     *
+     * _.isObjectLike({});
+     * // => true
+     *
+     * _.isObjectLike([1, 2, 3]);
+     * // => true
+     *
+     * _.isObjectLike(_.noop);
+     * // => false
+     *
+     * _.isObjectLike(null);
+     * // => false
+     */
+    function isObjectLike(value) {
+      return value != null && typeof value == 'object';
+    }
+
+    /** `Object#toString` result references. */
+    var symbolTag = '[object Symbol]';
+
+    /**
+     * Checks if `value` is classified as a `Symbol` primitive or object.
+     *
+     * @static
+     * @memberOf _
+     * @since 4.0.0
+     * @category Lang
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
+     * @example
+     *
+     * _.isSymbol(Symbol.iterator);
+     * // => true
+     *
+     * _.isSymbol('abc');
+     * // => false
+     */
+    function isSymbol(value) {
+      return typeof value == 'symbol' ||
+        (isObjectLike(value) && baseGetTag(value) == symbolTag);
+    }
+
+    /**
+     * A specialized version of `_.map` for arrays without support for iteratee
+     * shorthands.
+     *
+     * @private
+     * @param {Array} [array] The array to iterate over.
+     * @param {Function} iteratee The function invoked per iteration.
+     * @returns {Array} Returns the new mapped array.
+     */
+    function arrayMap(array, iteratee) {
+      var index = -1,
+          length = array == null ? 0 : array.length,
+          result = Array(length);
+
+      while (++index < length) {
+        result[index] = iteratee(array[index], index, array);
+      }
+      return result;
+    }
+
+    /**
+     * Checks if `value` is classified as an `Array` object.
+     *
+     * @static
+     * @memberOf _
+     * @since 0.1.0
+     * @category Lang
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is an array, else `false`.
+     * @example
+     *
+     * _.isArray([1, 2, 3]);
+     * // => true
+     *
+     * _.isArray(document.body.children);
+     * // => false
+     *
+     * _.isArray('abc');
+     * // => false
+     *
+     * _.isArray(_.noop);
+     * // => false
+     */
+    var isArray = Array.isArray;
+
+    var isArray$1 = isArray;
+
+    /** Used as references for various `Number` constants. */
+    var INFINITY = 1 / 0;
+
+    /** Used to convert symbols to primitives and strings. */
+    var symbolProto = Symbol$1 ? Symbol$1.prototype : undefined,
+        symbolToString = symbolProto ? symbolProto.toString : undefined;
+
+    /**
+     * The base implementation of `_.toString` which doesn't convert nullish
+     * values to empty strings.
+     *
+     * @private
+     * @param {*} value The value to process.
+     * @returns {string} Returns the string.
+     */
+    function baseToString(value) {
+      // Exit early for strings to avoid a performance hit in some environments.
+      if (typeof value == 'string') {
+        return value;
+      }
+      if (isArray$1(value)) {
+        // Recursively convert values (susceptible to call stack limits).
+        return arrayMap(value, baseToString) + '';
+      }
+      if (isSymbol(value)) {
+        return symbolToString ? symbolToString.call(value) : '';
+      }
+      var result = (value + '');
+      return (result == '0' && (1 / value) == -INFINITY) ? '-0' : result;
+    }
+
+    /**
+     * Converts `value` to a string. An empty string is returned for `null`
+     * and `undefined` values. The sign of `-0` is preserved.
+     *
+     * @static
+     * @memberOf _
+     * @since 4.0.0
+     * @category Lang
+     * @param {*} value The value to convert.
+     * @returns {string} Returns the converted string.
+     * @example
+     *
+     * _.toString(null);
+     * // => ''
+     *
+     * _.toString(-0);
+     * // => '-0'
+     *
+     * _.toString([1, 2, 3]);
+     * // => '1,2,3'
+     */
+    function toString(value) {
+      return value == null ? '' : baseToString(value);
+    }
+
+    /**
+     * A specialized version of `_.reduce` for arrays without support for
+     * iteratee shorthands.
+     *
+     * @private
+     * @param {Array} [array] The array to iterate over.
+     * @param {Function} iteratee The function invoked per iteration.
+     * @param {*} [accumulator] The initial value.
+     * @param {boolean} [initAccum] Specify using the first element of `array` as
+     *  the initial value.
+     * @returns {*} Returns the accumulated value.
+     */
+    function arrayReduce(array, iteratee, accumulator, initAccum) {
+      var index = -1,
+          length = array == null ? 0 : array.length;
+
+      if (initAccum && length) {
+        accumulator = array[++index];
+      }
+      while (++index < length) {
+        accumulator = iteratee(accumulator, array[index], index, array);
+      }
+      return accumulator;
+    }
+
+    /**
+     * The base implementation of `_.propertyOf` without support for deep paths.
+     *
+     * @private
+     * @param {Object} object The object to query.
+     * @returns {Function} Returns the new accessor function.
+     */
+    function basePropertyOf(object) {
+      return function(key) {
+        return object == null ? undefined : object[key];
+      };
+    }
+
+    /** Used to map Latin Unicode letters to basic Latin letters. */
+    var deburredLetters = {
+      // Latin-1 Supplement block.
+      '\xc0': 'A',  '\xc1': 'A', '\xc2': 'A', '\xc3': 'A', '\xc4': 'A', '\xc5': 'A',
+      '\xe0': 'a',  '\xe1': 'a', '\xe2': 'a', '\xe3': 'a', '\xe4': 'a', '\xe5': 'a',
+      '\xc7': 'C',  '\xe7': 'c',
+      '\xd0': 'D',  '\xf0': 'd',
+      '\xc8': 'E',  '\xc9': 'E', '\xca': 'E', '\xcb': 'E',
+      '\xe8': 'e',  '\xe9': 'e', '\xea': 'e', '\xeb': 'e',
+      '\xcc': 'I',  '\xcd': 'I', '\xce': 'I', '\xcf': 'I',
+      '\xec': 'i',  '\xed': 'i', '\xee': 'i', '\xef': 'i',
+      '\xd1': 'N',  '\xf1': 'n',
+      '\xd2': 'O',  '\xd3': 'O', '\xd4': 'O', '\xd5': 'O', '\xd6': 'O', '\xd8': 'O',
+      '\xf2': 'o',  '\xf3': 'o', '\xf4': 'o', '\xf5': 'o', '\xf6': 'o', '\xf8': 'o',
+      '\xd9': 'U',  '\xda': 'U', '\xdb': 'U', '\xdc': 'U',
+      '\xf9': 'u',  '\xfa': 'u', '\xfb': 'u', '\xfc': 'u',
+      '\xdd': 'Y',  '\xfd': 'y', '\xff': 'y',
+      '\xc6': 'Ae', '\xe6': 'ae',
+      '\xde': 'Th', '\xfe': 'th',
+      '\xdf': 'ss',
+      // Latin Extended-A block.
+      '\u0100': 'A',  '\u0102': 'A', '\u0104': 'A',
+      '\u0101': 'a',  '\u0103': 'a', '\u0105': 'a',
+      '\u0106': 'C',  '\u0108': 'C', '\u010a': 'C', '\u010c': 'C',
+      '\u0107': 'c',  '\u0109': 'c', '\u010b': 'c', '\u010d': 'c',
+      '\u010e': 'D',  '\u0110': 'D', '\u010f': 'd', '\u0111': 'd',
+      '\u0112': 'E',  '\u0114': 'E', '\u0116': 'E', '\u0118': 'E', '\u011a': 'E',
+      '\u0113': 'e',  '\u0115': 'e', '\u0117': 'e', '\u0119': 'e', '\u011b': 'e',
+      '\u011c': 'G',  '\u011e': 'G', '\u0120': 'G', '\u0122': 'G',
+      '\u011d': 'g',  '\u011f': 'g', '\u0121': 'g', '\u0123': 'g',
+      '\u0124': 'H',  '\u0126': 'H', '\u0125': 'h', '\u0127': 'h',
+      '\u0128': 'I',  '\u012a': 'I', '\u012c': 'I', '\u012e': 'I', '\u0130': 'I',
+      '\u0129': 'i',  '\u012b': 'i', '\u012d': 'i', '\u012f': 'i', '\u0131': 'i',
+      '\u0134': 'J',  '\u0135': 'j',
+      '\u0136': 'K',  '\u0137': 'k', '\u0138': 'k',
+      '\u0139': 'L',  '\u013b': 'L', '\u013d': 'L', '\u013f': 'L', '\u0141': 'L',
+      '\u013a': 'l',  '\u013c': 'l', '\u013e': 'l', '\u0140': 'l', '\u0142': 'l',
+      '\u0143': 'N',  '\u0145': 'N', '\u0147': 'N', '\u014a': 'N',
+      '\u0144': 'n',  '\u0146': 'n', '\u0148': 'n', '\u014b': 'n',
+      '\u014c': 'O',  '\u014e': 'O', '\u0150': 'O',
+      '\u014d': 'o',  '\u014f': 'o', '\u0151': 'o',
+      '\u0154': 'R',  '\u0156': 'R', '\u0158': 'R',
+      '\u0155': 'r',  '\u0157': 'r', '\u0159': 'r',
+      '\u015a': 'S',  '\u015c': 'S', '\u015e': 'S', '\u0160': 'S',
+      '\u015b': 's',  '\u015d': 's', '\u015f': 's', '\u0161': 's',
+      '\u0162': 'T',  '\u0164': 'T', '\u0166': 'T',
+      '\u0163': 't',  '\u0165': 't', '\u0167': 't',
+      '\u0168': 'U',  '\u016a': 'U', '\u016c': 'U', '\u016e': 'U', '\u0170': 'U', '\u0172': 'U',
+      '\u0169': 'u',  '\u016b': 'u', '\u016d': 'u', '\u016f': 'u', '\u0171': 'u', '\u0173': 'u',
+      '\u0174': 'W',  '\u0175': 'w',
+      '\u0176': 'Y',  '\u0177': 'y', '\u0178': 'Y',
+      '\u0179': 'Z',  '\u017b': 'Z', '\u017d': 'Z',
+      '\u017a': 'z',  '\u017c': 'z', '\u017e': 'z',
+      '\u0132': 'IJ', '\u0133': 'ij',
+      '\u0152': 'Oe', '\u0153': 'oe',
+      '\u0149': "'n", '\u017f': 's'
+    };
+
+    /**
+     * Used by `_.deburr` to convert Latin-1 Supplement and Latin Extended-A
+     * letters to basic Latin letters.
+     *
+     * @private
+     * @param {string} letter The matched letter to deburr.
+     * @returns {string} Returns the deburred letter.
+     */
+    var deburrLetter = basePropertyOf(deburredLetters);
+
+    var deburrLetter$1 = deburrLetter;
+
+    /** Used to match Latin Unicode letters (excluding mathematical operators). */
+    var reLatin = /[\xc0-\xd6\xd8-\xf6\xf8-\xff\u0100-\u017f]/g;
+
+    /** Used to compose unicode character classes. */
+    var rsComboMarksRange$1 = '\\u0300-\\u036f',
+        reComboHalfMarksRange$1 = '\\ufe20-\\ufe2f',
+        rsComboSymbolsRange$1 = '\\u20d0-\\u20ff',
+        rsComboRange$1 = rsComboMarksRange$1 + reComboHalfMarksRange$1 + rsComboSymbolsRange$1;
+
+    /** Used to compose unicode capture groups. */
+    var rsCombo$1 = '[' + rsComboRange$1 + ']';
+
+    /**
+     * Used to match [combining diacritical marks](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks) and
+     * [combining diacritical marks for symbols](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks_for_Symbols).
+     */
+    var reComboMark = RegExp(rsCombo$1, 'g');
+
+    /**
+     * Deburrs `string` by converting
+     * [Latin-1 Supplement](https://en.wikipedia.org/wiki/Latin-1_Supplement_(Unicode_block)#Character_table)
+     * and [Latin Extended-A](https://en.wikipedia.org/wiki/Latin_Extended-A)
+     * letters to basic Latin letters and removing
+     * [combining diacritical marks](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks).
+     *
+     * @static
+     * @memberOf _
+     * @since 3.0.0
+     * @category String
+     * @param {string} [string=''] The string to deburr.
+     * @returns {string} Returns the deburred string.
+     * @example
+     *
+     * _.deburr('déjà vu');
+     * // => 'deja vu'
+     */
+    function deburr(string) {
+      string = toString(string);
+      return string && string.replace(reLatin, deburrLetter$1).replace(reComboMark, '');
+    }
+
+    /** Used to match words composed of alphanumeric characters. */
+    var reAsciiWord = /[^\x00-\x2f\x3a-\x40\x5b-\x60\x7b-\x7f]+/g;
+
+    /**
+     * Splits an ASCII `string` into an array of its words.
+     *
+     * @private
+     * @param {string} The string to inspect.
+     * @returns {Array} Returns the words of `string`.
+     */
+    function asciiWords(string) {
+      return string.match(reAsciiWord) || [];
+    }
+
+    /** Used to detect strings that need a more robust regexp to match words. */
+    var reHasUnicodeWord = /[a-z][A-Z]|[A-Z]{2}[a-z]|[0-9][a-zA-Z]|[a-zA-Z][0-9]|[^a-zA-Z0-9 ]/;
+
+    /**
+     * Checks if `string` contains a word composed of Unicode symbols.
+     *
+     * @private
+     * @param {string} string The string to inspect.
+     * @returns {boolean} Returns `true` if a word is found, else `false`.
+     */
+    function hasUnicodeWord(string) {
+      return reHasUnicodeWord.test(string);
+    }
+
+    /** Used to compose unicode character classes. */
+    var rsAstralRange = '\\ud800-\\udfff',
+        rsComboMarksRange = '\\u0300-\\u036f',
+        reComboHalfMarksRange = '\\ufe20-\\ufe2f',
+        rsComboSymbolsRange = '\\u20d0-\\u20ff',
+        rsComboRange = rsComboMarksRange + reComboHalfMarksRange + rsComboSymbolsRange,
+        rsDingbatRange = '\\u2700-\\u27bf',
+        rsLowerRange = 'a-z\\xdf-\\xf6\\xf8-\\xff',
+        rsMathOpRange = '\\xac\\xb1\\xd7\\xf7',
+        rsNonCharRange = '\\x00-\\x2f\\x3a-\\x40\\x5b-\\x60\\x7b-\\xbf',
+        rsPunctuationRange = '\\u2000-\\u206f',
+        rsSpaceRange = ' \\t\\x0b\\f\\xa0\\ufeff\\n\\r\\u2028\\u2029\\u1680\\u180e\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200a\\u202f\\u205f\\u3000',
+        rsUpperRange = 'A-Z\\xc0-\\xd6\\xd8-\\xde',
+        rsVarRange = '\\ufe0e\\ufe0f',
+        rsBreakRange = rsMathOpRange + rsNonCharRange + rsPunctuationRange + rsSpaceRange;
+
+    /** Used to compose unicode capture groups. */
+    var rsApos$1 = "['\u2019]",
+        rsBreak = '[' + rsBreakRange + ']',
+        rsCombo = '[' + rsComboRange + ']',
+        rsDigits = '\\d+',
+        rsDingbat = '[' + rsDingbatRange + ']',
+        rsLower = '[' + rsLowerRange + ']',
+        rsMisc = '[^' + rsAstralRange + rsBreakRange + rsDigits + rsDingbatRange + rsLowerRange + rsUpperRange + ']',
+        rsFitz = '\\ud83c[\\udffb-\\udfff]',
+        rsModifier = '(?:' + rsCombo + '|' + rsFitz + ')',
+        rsNonAstral = '[^' + rsAstralRange + ']',
+        rsRegional = '(?:\\ud83c[\\udde6-\\uddff]){2}',
+        rsSurrPair = '[\\ud800-\\udbff][\\udc00-\\udfff]',
+        rsUpper = '[' + rsUpperRange + ']',
+        rsZWJ = '\\u200d';
+
+    /** Used to compose unicode regexes. */
+    var rsMiscLower = '(?:' + rsLower + '|' + rsMisc + ')',
+        rsMiscUpper = '(?:' + rsUpper + '|' + rsMisc + ')',
+        rsOptContrLower = '(?:' + rsApos$1 + '(?:d|ll|m|re|s|t|ve))?',
+        rsOptContrUpper = '(?:' + rsApos$1 + '(?:D|LL|M|RE|S|T|VE))?',
+        reOptMod = rsModifier + '?',
+        rsOptVar = '[' + rsVarRange + ']?',
+        rsOptJoin = '(?:' + rsZWJ + '(?:' + [rsNonAstral, rsRegional, rsSurrPair].join('|') + ')' + rsOptVar + reOptMod + ')*',
+        rsOrdLower = '\\d*(?:1st|2nd|3rd|(?![123])\\dth)(?=\\b|[A-Z_])',
+        rsOrdUpper = '\\d*(?:1ST|2ND|3RD|(?![123])\\dTH)(?=\\b|[a-z_])',
+        rsSeq = rsOptVar + reOptMod + rsOptJoin,
+        rsEmoji = '(?:' + [rsDingbat, rsRegional, rsSurrPair].join('|') + ')' + rsSeq;
+
+    /** Used to match complex or compound words. */
+    var reUnicodeWord = RegExp([
+      rsUpper + '?' + rsLower + '+' + rsOptContrLower + '(?=' + [rsBreak, rsUpper, '$'].join('|') + ')',
+      rsMiscUpper + '+' + rsOptContrUpper + '(?=' + [rsBreak, rsUpper + rsMiscLower, '$'].join('|') + ')',
+      rsUpper + '?' + rsMiscLower + '+' + rsOptContrLower,
+      rsUpper + '+' + rsOptContrUpper,
+      rsOrdUpper,
+      rsOrdLower,
+      rsDigits,
+      rsEmoji
+    ].join('|'), 'g');
+
+    /**
+     * Splits a Unicode `string` into an array of its words.
+     *
+     * @private
+     * @param {string} The string to inspect.
+     * @returns {Array} Returns the words of `string`.
+     */
+    function unicodeWords(string) {
+      return string.match(reUnicodeWord) || [];
+    }
+
+    /**
+     * Splits `string` into an array of its words.
+     *
+     * @static
+     * @memberOf _
+     * @since 3.0.0
+     * @category String
+     * @param {string} [string=''] The string to inspect.
+     * @param {RegExp|string} [pattern] The pattern to match words.
+     * @param- {Object} [guard] Enables use as an iteratee for methods like `_.map`.
+     * @returns {Array} Returns the words of `string`.
+     * @example
+     *
+     * _.words('fred, barney, & pebbles');
+     * // => ['fred', 'barney', 'pebbles']
+     *
+     * _.words('fred, barney, & pebbles', /[^, ]+/g);
+     * // => ['fred', 'barney', '&', 'pebbles']
+     */
+    function words(string, pattern, guard) {
+      string = toString(string);
+      pattern = guard ? undefined : pattern;
+
+      if (pattern === undefined) {
+        return hasUnicodeWord(string) ? unicodeWords(string) : asciiWords(string);
+      }
+      return string.match(pattern) || [];
+    }
+
+    /** Used to compose unicode capture groups. */
+    var rsApos = "['\u2019]";
+
+    /** Used to match apostrophes. */
+    var reApos = RegExp(rsApos, 'g');
+
+    /**
+     * Creates a function like `_.camelCase`.
+     *
+     * @private
+     * @param {Function} callback The function to combine each word.
+     * @returns {Function} Returns the new compounder function.
+     */
+    function createCompounder(callback) {
+      return function(string) {
+        return arrayReduce(words(deburr(string).replace(reApos, '')), callback, '');
+      };
+    }
+
+    /**
+     * Converts `string` to
+     * [kebab case](https://en.wikipedia.org/wiki/Letter_case#Special_case_styles).
+     *
+     * @static
+     * @memberOf _
+     * @since 3.0.0
+     * @category String
+     * @param {string} [string=''] The string to convert.
+     * @returns {string} Returns the kebab cased string.
+     * @example
+     *
+     * _.kebabCase('Foo Bar');
+     * // => 'foo-bar'
+     *
+     * _.kebabCase('fooBar');
+     * // => 'foo-bar'
+     *
+     * _.kebabCase('__FOO_BAR__');
+     * // => 'foo-bar'
+     */
+    var kebabCase = createCompounder(function(result, word, index) {
+      return result + (index ? '-' : '') + word.toLowerCase();
+    });
+
+    var kebabCase$1 = kebabCase;
+
+    class FontLoader {
+        constructor(options) {
+            this.fontLinkElements = {};
+            this.validFonts = {};
+            this.fontsToLoad = {};
+            this.styleSheet = options.styleSheet;
+            this.host = options.host || document.head;
+            this.addFonts(options.defaultFonts);
+        }
+        get availableFonts() {
+            return Object.values(this.validFonts);
+        }
+        addFonts(fonts) {
+            for (const font of fonts) {
+                const kebabFamilyName = kebabCase$1(font.family);
+                this.validFonts[kebabFamilyName] = font;
+            }
+        }
+        loadGoogleFonts(fonts) {
+            for (const font of fonts) {
+                const ruleKey = this.getFontRuleKey(font);
+                const fontDescriptor = this.validFonts[font.kebabFamilyName];
+                if (!this.fontLinkElements[ruleKey]) {
+                    let family = fontDescriptor.family;
+                    if (font.style === "normal") {
+                        family += `:wght@${font.weight}`;
+                    }
+                    else if (font.style === "italic") {
+                        family += `:ital,wght@1,${font.weight}`;
+                    }
+                    const url = new URL("https://fonts.googleapis.com/css2");
+                    url.searchParams.set("display", "swap");
+                    url.searchParams.set("family", family);
+                    const linkElement = document.createElement("link");
+                    linkElement.rel = "stylesheet";
+                    linkElement.href = url.href;
+                    this.fontLinkElements[ruleKey] = linkElement;
+                    this.host.append(linkElement);
+                }
+            }
+        }
+        updateFontFaces() {
+            const allFontsToLoad = Object.values(this.fontsToLoad);
+            const googleFonts = allFontsToLoad.filter(x => {
+                const fontDescriptor = this.validFonts[x.kebabFamilyName];
+                if (fontDescriptor.provider === "GOOGLE")
+                    return true;
+                return false;
+            });
+            this.loadGoogleFonts(googleFonts);
+        }
+        getFontRuleKey(font) {
+            return `${font.kebabFamilyName}-${font.weight}-${font.style}`;
+        }
+        getFontClassName(kebabFamilyname) {
+            const rule = this.styleSheet.getRule(kebabFamilyname);
+            return rule.options.classes[kebabFamilyname];
+        }
+        _loadFont(font, updateFontFaces = true) {
+            const ruleKey = this.getFontRuleKey(font);
+            this.fontsToLoad[ruleKey] = font;
+            const fontDescriptor = this.validFonts[font.kebabFamilyName];
+            this.styleSheet.replaceRule(font.kebabFamilyName, {
+                fontFamily: fontDescriptor.family
+            });
+            if (updateFontFaces)
+                this.updateFontFaces();
+        }
+        _loadFonts(fonts, updateFontFaces = true) {
+            for (const font of fonts) {
+                this._loadFont(font, false);
+            }
+            if (updateFontFaces)
+                this.updateFontFaces();
+        }
+        loadFont(font) {
+            this._loadFont(font);
+        }
+        loadFonts(fonts) {
+            this._loadFonts(fonts);
+        }
+    }
+
+    const DefaultFonts = [
+        { provider: "GOOGLE", family: "Roboto", weights: [100, 300, 400, 500, 700, 900], styles: ["normal", "italic"] },
+        { provider: "GOOGLE", family: "Poppins", weights: [100, 200, 300, 400, 500, 600, 700, 800, 900], styles: ["normal", "italic"] },
+        { provider: "GOOGLE", family: "Open Sans", weights: [300, 400, 500, 600, 700, 800], styles: ["normal", "italic"] },
+        { provider: "GOOGLE", family: "Noto Sans", weights: [100, 200, 300, 400, 500, 600, 700, 800, 900], styles: ["normal", "italic"] },
+        { provider: "GOOGLE", family: "Montserrat", weights: [100, 200, 300, 400, 500, 600, 700, 800, 900], styles: ["normal", "italic"] },
+        { provider: "GOOGLE", family: "Ubuntu", weights: [300, 400, 500, 700], styles: ["normal", "italic"] }
+    ];
+
+    class KappaFontPlugin extends KappaPluginBase {
+        get name() {
+            return "Font Loader";
+        }
+        get configurable() {
+            return true;
+        }
+        setup(config) {
+            return __awaiter$1(this, void 0, void 0, function* () {
+                this._pluginConfig = config.plugin;
+                this.pluginInterfaceService = config.pluginInterfaceService;
+                this.pluginStyleSheet = this.pluginInterfaceService.getPluginStyleSheet(this.pluginConfig.id.toLowerCase());
+                this.fontLoader = new FontLoader({ styleSheet: this.pluginStyleSheet, defaultFonts: DefaultFonts });
+                this.setupCustomFontStyleContainer();
+                yield this.processCustomFonts();
+                this._isReady = true;
+            });
+        }
+        setupCustomFontStyleContainer() {
+            this.customFontStyleContainer = document.createElement("style");
+            this.customFontStyleContainer.setAttribute("id", "font-plugin--custom-font");
+            this.customFontStyleContainer.setAttribute("type", "text/css");
+            document.head.appendChild(this.customFontStyleContainer);
+        }
+        get fonts() {
+            return this.fontLoader.availableFonts;
+        }
+        getFontClassName(kebabFamilyName) {
+            return this.fontLoader.getFontClassName(kebabFamilyName);
+        }
+        getAssetSrc(assetId) {
+            return __awaiter$1(this, void 0, void 0, function* () {
+                try {
+                    const asset = yield this.pluginInterfaceService.getAssetById(assetId);
+                    if (!(asset === null || asset === void 0 ? void 0 : asset.url))
+                        return null;
+                    const mimeType = asset.mimeType;
+                    const fontFormat = this.fontFormatFromMimeType(mimeType);
+                    const src = `url(${asset.url}) format('${fontFormat}')`;
+                    return src;
+                }
+                catch (e) {
+                    console.log(e);
+                }
+                return "";
+            });
+        }
+        fontFormatFromMimeType(mimeType) {
+            if (mimeType.toLowerCase().indexOf("woff2") !== -1) {
+                return "woff2";
+            }
+            else if (mimeType.toLowerCase().indexOf("woff") !== -1) {
+                return "woff";
+            }
+            else if (mimeType.toLowerCase().indexOf("ttf") !== -1 || mimeType.toLowerCase().indexOf("truetype") !== -1) {
+                return "truetype";
+            }
+            else if (mimeType.toLowerCase().indexOf("otf") !== -1 || mimeType.toLowerCase().indexOf("opentype") !== -1) {
+                return "opentype";
+            }
+            return "truetype";
+        }
+        getFontFace(fontFamily) {
+            return __awaiter$1(this, void 0, void 0, function* () {
+                let fontFaceString = ``;
+                for (const mapping of fontFamily.mappings) {
+                    const assetSrc = yield this.getAssetSrc(mapping.assetId);
+                    const fontStyle = mapping.style || "normal";
+                    if (mapping.weight && mapping.assetId && assetSrc) {
+                        const mappingFontFace = `
+                @font-face {
+                    font-family: ${kebabCase$1(fontFamily.name)};
+                    font-style: ${fontStyle};
+                    font-weight: ${mapping.weight};
+                    src: ${assetSrc};
+                }
+                `;
+                        fontFaceString += mappingFontFace;
+                    }
+                }
+                return fontFaceString;
+            });
+        }
+        processCustomFonts() {
+            var _a;
+            return __awaiter$1(this, void 0, void 0, function* () {
+                const pluginData = this.pluginInterfaceService.getPluginOptions(this.pluginConfig.id);
+                const fontFamilies = ((_a = pluginData === null || pluginData === void 0 ? void 0 : pluginData.options) === null || _a === void 0 ? void 0 : _a.fontFamilies) || [];
+                const fontLoaderFonts = [];
+                let customFontStyle = "";
+                for (const fontFamily of fontFamilies) {
+                    const weights = (fontFamily.mappings || []).map(x => parseInt(x.weight));
+                    const styles = (fontFamily.mappings || []).map(x => x.style);
+                    const font = {
+                        provider: "CUSTOM",
+                        family: fontFamily.name,
+                        weights: weights,
+                        styles: styles
+                    };
+                    fontLoaderFonts.push(font);
+                    customFontStyle += yield this.getFontFace(fontFamily);
+                }
+                this.customFontStyleContainer.innerHTML = customFontStyle;
+                this.fontLoader.addFonts(fontLoaderFonts);
+            });
+        }
+        addFont(font) {
+            const fontClone = JSON.parse(JSON.stringify(font));
+            this.fontLoader.addFonts([fontClone]);
+        }
+        loadFonts(fonts) {
+            this.fontLoader.loadFonts(fonts);
+        }
+    }
+
+    registerIntegrationPlugin("KappaFontPlugin", KappaFontPlugin);
+
+})();
+//# sourceMappingURL=plugin-font-loader.viewer.js.map
